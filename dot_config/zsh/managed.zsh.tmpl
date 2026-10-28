@@ -66,3 +66,15 @@ source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 if command -v nvim >/dev/null 2>&1; then
   alias vi=nvim vim=nvim
 fi
+
+if (( $+commands[bw] )); then
+  bw() {
+    if [[ $# -eq 1 && "$1" == unlock ]]; then
+      local session
+      session="$(command bw unlock --raw)" || return $?
+      export BW_SESSION="$session"
+    else
+      command bw "$@"
+    fi
+  }
+fi
