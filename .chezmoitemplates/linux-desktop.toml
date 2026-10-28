@@ -64,6 +64,11 @@ icon = "resources/icons/256x256.png"
 
 {{ if eq $arch "amd64" }}
 [[apps]]
+name = "stremio"
+kind = "flatpak"
+appId = "com.stremio.Stremio"
+
+[[apps]]
 name = "upscayl"
 kind = "deb"
 package = "upscayl"

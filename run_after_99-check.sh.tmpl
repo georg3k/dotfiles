@@ -17,6 +17,10 @@ done
 if [ "$(dpkg-query -W -f='${Status}' {{ $app.package | quote }} 2>/dev/null || :)" != 'install ok installed' ]; then
   printf '%s\n' 'MISSING: {{ $app.name }}' >&2; missing=1
 fi
+{{ else if eq $app.kind "flatpak" -}}
+if ! flatpak info --user {{ $app.appId | quote }} >/dev/null 2>&1; then
+  printf '%s\n' 'MISSING: {{ $app.name }} Flatpak' >&2; missing=1
+fi
 {{ else if eq $app.kind "qt-installer" -}}
 if [ ! -x /opt/AmneziaVPN/client/AmneziaVPN ]; then
   printf '%s\n' 'MISSING: AmneziaVPN' >&2; missing=1

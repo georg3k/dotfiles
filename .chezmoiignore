@@ -30,6 +30,7 @@ README.md
 Library/Application Support/Code/**
 Library/LaunchAgents/org.clamav.freshclam.plist
 .config/clamav/**
+.local/share/themes/rose-pine-telegram/*-macos.palette
 {{ end }}
 {{ if or (ne .chezmoi.os "linux") (eq .profile "minimal") }}
 .config/Code/**

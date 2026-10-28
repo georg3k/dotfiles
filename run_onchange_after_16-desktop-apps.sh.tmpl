@@ -94,6 +94,10 @@ install_amnezia() {
 {{ range $app := $manifest.apps -}}
 {{ if eq $app.kind "deb" -}}
 install_deb {{ $app.package | quote }} {{ $app.url | quote }} {{ get $app "sha256" | default "" | quote }}
+{{ else if eq $app.kind "flatpak" -}}
+if ! command -v flatpak >/dev/null 2>&1; then sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y flatpak; fi
+flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install --user --noninteractive -y flathub {{ $app.appId | quote }}
 {{ else if eq $app.kind "tar" -}}
 install_archive {{ $app.name | quote }} {{ $app.url | quote }} {{ get $app "sha256" | default "" | quote }} {{ $app.strip }} {{ $app.binary | quote }} {{ $app.icon | quote }}
 {{ else if eq $app.kind "appimage" -}}
