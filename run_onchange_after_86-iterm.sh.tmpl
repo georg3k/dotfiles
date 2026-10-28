@@ -16,5 +16,33 @@ cp "$HOME/.local/share/themes/rose-pine-iterm/rose-pine.itermcolors" "$preset"
 /usr/libexec/PlistBuddy -c 'Set :Cursor\ Text\ Color:Red\ Component 0.0980392157' "$preset"
 /usr/libexec/PlistBuddy -c 'Set :Cursor\ Text\ Color:Green\ Component 0.0901960784' "$preset"
 /usr/libexec/PlistBuddy -c 'Set :Cursor\ Text\ Color:Blue\ Component 0.1411764706' "$preset"
+/usr/libexec/PlistBuddy -c 'Set :Selection\ Color:Red\ Component 0.3843137255' "$preset"
+/usr/libexec/PlistBuddy -c 'Set :Selection\ Color:Green\ Component 0.3686274510' "$preset"
+/usr/libexec/PlistBuddy -c 'Set :Selection\ Color:Blue\ Component 0.4784313725' "$preset"
+
+python3 - <<'PYTHON'
+import plistlib
+import subprocess
+
+settings = plistlib.loads(subprocess.check_output(["defaults", "export", "com.googlecode.iterm2", "-"]))
+profiles = settings.get("New Bookmarks", [])
+changed = False
+for profile in profiles:
+    if profile.get("Use Separate Colors for Light and Dark Mode"):
+        key = "Selection Color (Dark)"
+    else:
+        background = profile.get("Background Color", {})
+        if max(background.get(component + " Component", 1) for component in ("Red", "Green", "Blue")) > 0.5:
+            continue
+        key = "Selection Color"
+    color = {"Red Component": 98 / 255, "Green Component": 94 / 255, "Blue Component": 122 / 255,
+             "Alpha Component": 1.0, "Color Space": "sRGB"}
+    if profile.get(key) != color:
+        profile[key] = color
+        changed = True
+if changed:
+    subprocess.run(["defaults", "write", "com.googlecode.iterm2", "New Bookmarks", "-array",
+                    *(plistlib.dumps(profile).decode() for profile in profiles)], check=True)
+PYTHON
 {{ end -}}
 {{ end -}}
