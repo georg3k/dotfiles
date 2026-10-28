@@ -1,3 +1,12 @@
 #!/bin/sh
+{{ if eq .profile "minimal" -}}
+set -eu
+export PATH="$HOME/.local/bin:$PATH"
+mkdir -p "$HOME/.local/share/zsh/site-functions"
+for tool in chezmoi kubectl helm podman; do
+  "$tool" completion zsh > "$HOME/.local/share/zsh/site-functions/_$tool"
+done
+{{ else -}}
 SETUP_PROFILE={{ .profile | quote }}
 {{ include ".private/completions.age" | decrypt }}
+{{ end -}}

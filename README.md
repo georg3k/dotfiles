@@ -8,7 +8,7 @@ Personal [chezmoi](https://www.chezmoi.io/) setup for macOS and Ubuntu.
 sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply --use-builtin-git=true https://github.com/georg3k/dotfiles.git
 ```
 
-For secret decryption, place your **age** private key at `~/.config/chezmoi/age-key.txt`.
+Personal/corporate: place your **age** private key at `~/.config/chezmoi/age-key.txt`. Minimal needs no key. For minimal bootstrap, append `--prompt --promptChoice profile=minimal` to the command above.
 
 ## Profiles
 

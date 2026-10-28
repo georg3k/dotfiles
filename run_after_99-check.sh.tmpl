@@ -1,10 +1,13 @@
 #!/bin/sh
 set -eu
+export PATH="$HOME/.local/bin:$PATH"
+{{ if ne .profile "minimal" -}}
 {{ include ".private/check-path.age" | decrypt }}
+{{ end -}}
 printf '\nDeployment profile: %s\n' {{ .profile | quote }}
 {{ if eq .chezmoi.os "linux" -}}
 missing=0
-for command in zsh nvim tmux podman kubectl helm terraform terraform-ls terragrunt grpcurl grpcui yq bw {{ include ".private/check-tools.age" | decrypt | trim }} jinja-lsp java javaws hugo; do
+for command in zsh nvim tmux podman kubectl helm terraform terraform-ls terragrunt grpcurl grpcui yq bw {{ if ne .profile "minimal" }}{{ include ".private/check-tools.age" | decrypt | trim }}{{ end }} jinja-lsp java javaws hugo; do
   if ! command -v "$command" >/dev/null 2>&1; then
     printf 'MISSING: %s\n' "$command" >&2
     missing=1

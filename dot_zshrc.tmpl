@@ -1,6 +1,8 @@
 typeset -U path PATH fpath
 path=("$HOME/.local/bin" $path)
+{{ if ne .profile "minimal" -}}
 {{ include ".private/shell-path.age" | decrypt }}
+{{ end -}}
 {{ if (eq .profile "corporate") -}}
 {{ include ".private/shell-corporate-path.age" | decrypt }}
 {{ end -}}

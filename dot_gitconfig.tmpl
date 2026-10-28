@@ -4,7 +4,9 @@
 [include]
     path = ~/.config/git/github.inc
 
+{{ if ne .profile "minimal" -}}
 {{ include ".private/identity-rule.age" | decrypt }}
+{{ end -}}
 
 [core]
     editor = nvim

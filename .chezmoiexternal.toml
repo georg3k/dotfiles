@@ -207,8 +207,12 @@ executable = true
 type = "archive-file"
 {{ $version := (gitHubLatestRelease (printf "hashicorp/%s" $tool)).TagName | toString | trimPrefix "v" -}}
 {{ $file := printf "%s_%s_%s_%s.zip" $tool $version $.chezmoi.os $.chezmoi.arch -}}
+{{ $base := "https://mirror.selectel.ru/3rd-party/hashicorp-releases" -}}
+{{ if ne $.profile "minimal" -}}
 {{ $sources := include ".private/sources.age" | decrypt | fromJson -}}
-{{ $mirror := printf "%s/%s/%s" $sources.mirror $tool $version -}}
+{{ $base = $sources.mirror -}}
+{{ end -}}
+{{ $mirror := printf "%s/%s/%s" $base $tool $version -}}
 url = "{{ $mirror }}/{{ $file }}"
 {{ $sums := output "curl" "-fsSL" "--connect-timeout" "15" "--max-time" "120" (printf "%s/%s_%s_SHA256SUMS" $mirror $tool $version) -}}
 {{ $line := regexFind (printf "(?m)^[a-f0-9]{64} +%s$" (regexQuoteMeta $file)) $sums -}}
@@ -225,6 +229,7 @@ type = "file"
 {{ includeTemplate "github-asset.toml" (dict "repo" "uros-5/jinja-lsp" "pattern" (printf "jinja-lsp-%s-%s" $rustArch $rustOS)) }}
 executable = true
 
+{{ if ne .profile "minimal" -}}
 {{ $privateTargets := include ".private/targets.age" | decrypt | fromJson -}}
 {{ range $file := $privateTargets.files -}}
 {{ if or (not $file.corporate) (eq $.profile "corporate") }}
@@ -236,3 +241,4 @@ private = true
 refreshPeriod = "1ns"
 {{ end }}
 {{ end }}
+{{ end -}}

@@ -8,12 +8,14 @@
 {{- if and (eq $profile "minimal") (ne .chezmoi.os "linux") -}}
 {{- fail "minimal is Linux-only" -}}
 {{- end -}}
+{{ if ne $profile "minimal" -}}
 encryption = "age"
 
 [age]
 identity = {{ joinPath .chezmoi.homeDir ".config/chezmoi/age-key.txt" | quote }}
 recipient = "age1zugzlfsl6slsmz6yvnwkruj3tl6y5w8yxr0dvzzf0tpxeyg96qrqafjped"
 
+{{ end -}}
 [gitHub]
 refreshPeriod = "24h"
 

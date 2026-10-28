@@ -43,7 +43,8 @@ Library/LaunchAgents/org.clamav.freshclam.plist
 {{ end }}
 
 {{ if eq .profile "minimal" }}
-# No desktop account/agent configuration in minimal.
+# No private account or provider configuration in minimal.
+.terraformrc
 .ssh/**
 {{ end }}
 
