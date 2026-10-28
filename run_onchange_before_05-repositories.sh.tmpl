@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 {{ if eq .chezmoi.os "linux" -}}
 #!/bin/sh
 set -eu
@@ -58,6 +59,7 @@ Signed-By: /etc/apt/keyrings/microsoft.asc
 EOF
 {{ if eq .chezmoi.arch "amd64" -}}
 {{ include ".private/repository.age" | decrypt }}
+{{ end -}}
 {{ end -}}
 {{ end -}}
 {{ end -}}

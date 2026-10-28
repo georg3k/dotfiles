@@ -1,14 +1,14 @@
 {{- if not (has .chezmoi.os (list "darwin" "linux")) -}}
 {{- fail "This project supports macOS or Ubuntu Linux" -}}
 {{- end -}}
-{{- if not (has .chezmoi.arch (list "amd64" "arm64")) -}}
+{{- if and (ne .profile "config") (not (has .chezmoi.arch (list "amd64" "arm64"))) -}}
 {{- fail "This project supports amd64 or arm64" -}}
 {{- end -}}
 {{- if hasKey . "corporate" -}}
 {{- fail "Legacy corporate boolean found: run chezmoi init --prompt to select a profile before applying" -}}
 {{- end -}}
-{{- if not (has .profile (list "personal" "corporate" "minimal")) -}}
-{{- fail "profile must be personal, corporate or minimal" -}}
+{{- if not (has .profile (list "personal" "corporate" "minimal" "config")) -}}
+{{- fail "profile must be personal, corporate, minimal or config" -}}
 {{- end -}}
 {{- if and (eq .profile "corporate") (ne .chezmoi.os "darwin") -}}
 {{- fail "corporate is macOS-only" -}}
@@ -51,6 +51,35 @@ Library/LaunchAgents/org.clamav.freshclam.plist
 # Generated locally by glib-compile-schemas.
 .local/share/gnome-shell/extensions/nightthemeswitcher@romainvigier.fr/schemas/gschemas.compiled
 
-{{ if not (and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.versionID "24.04")) }}
+{{ if not (and (ne .profile "config") (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.versionID "24.04")) }}
 .local/bin/nvim
+{{ end }}
+
+{{ if eq .profile "config" }}
+Library/**
+.local/**
+.ssh/**
+.terraformrc
+.zshenv
+.config/clamav/**
+.config/Code/**
+.config/gtk-4.0/**
+.config/icedtea-web/**
+{{ if not (lookPath "git") }}
+.gitconfig
+.config/git/**
+{{ end }}
+{{ if not (lookPath "zsh") }}
+.zshrc
+{{ end }}
+{{ if not (or (lookPath "vim") (lookPath "vi")) }}
+.vimrc
+{{ end }}
+{{ if not (lookPath "nvim") }}
+.config/nvim/**
+{{ end }}
+{{ if not (lookPath "tmux") }}
+.tmux.conf
+.config/tmux/**
+{{ end }}
 {{ end }}

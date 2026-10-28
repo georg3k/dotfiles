@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 #!/bin/sh
 {{ if eq .profile "minimal" -}}
 set -eu
@@ -9,4 +10,5 @@ done
 {{ else -}}
 SETUP_PROFILE={{ .profile | quote }}
 {{ include ".private/completions.age" | decrypt }}
+{{ end -}}
 {{ end -}}

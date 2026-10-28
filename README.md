@@ -8,13 +8,14 @@ Personal [chezmoi](https://www.chezmoi.io/) setup for macOS and Ubuntu 26.04 (mi
 sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply --use-builtin-git=true https://github.com/georg3k/dotfiles.git
 ```
 
-Personal/corporate: place your **age** private key at `~/.config/chezmoi/age-key.txt`. Minimal needs no key. For minimal bootstrap, append `--prompt --promptChoice profile=minimal` to the command above.
+Personal/corporate: place your **age** private key at `~/.config/chezmoi/age-key.txt`. Minimal/config need no key. Append `--prompt --promptChoice profile=minimal` (or `profile=config`) to select a key-free profile.
 
 ## Profiles
 
 - **personal** (default) — macOS/Ubuntu: dev tools + desktop apps
 - **corporate** — macOS: personal profile with corporate tooling
-- **minimal** — Ubuntu: compact headless setup
+- **minimal** — Ubuntu 24.04/26.04: work tools and configuration, with package/system setup
+- **config** — rootless, key-free Git/shell/editor/tmux configuration for installed tools; no downloads, installs or system changes
 
 ## What's managed
 

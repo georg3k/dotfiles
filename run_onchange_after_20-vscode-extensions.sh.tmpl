@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 {{ if ne .profile "minimal" -}}
 #!/bin/sh
 set -eu
@@ -31,5 +32,6 @@ fi
 code --profile Corporate --install-extension {{ . | quote }}
 {{ end -}}
 {{ include ".private/editor-private.age" | decrypt }}
+{{ end -}}
 {{ end -}}
 {{ end -}}

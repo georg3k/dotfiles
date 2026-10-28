@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 #!/bin/sh
 set -eu
 {{ if eq .chezmoi.os "darwin" -}}
@@ -18,4 +19,5 @@ APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Unattended-Upgrade "1";
 EOF
 sudo systemctl enable --now apt-daily.timer apt-daily-upgrade.timer
+{{ end -}}
 {{ end -}}

@@ -11,6 +11,7 @@ set number
 set ignorecase smartcase
 " Indentation remains filetype/project-specific. No plugin manager or remaps.
 
+{{ if ne .profile "config" -}}
 " Load the native Vim package before selecting its colorscheme.
 packadd rose-pine
 set termguicolors
@@ -37,3 +38,4 @@ augroup RosePineAppearance
   autocmd!
   autocmd FocusGained * call RosePineAppearance()
 augroup END
+{{ end -}}

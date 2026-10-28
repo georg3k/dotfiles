@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 {{ if ne .profile "minimal" -}}
 #!/bin/sh
 set -eu
@@ -19,5 +20,6 @@ if [ -n "$cli" ]; then
 else
   printf '%s\n' 'Obsidian CLI needs a newer desktop installer; enable it in Settings → General after upgrading.'
 fi
+{{ end -}}
 {{ end -}}
 {{ end -}}

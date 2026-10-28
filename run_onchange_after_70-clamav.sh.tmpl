@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 {{ if ne .profile "minimal" -}}
 #!/bin/sh
 set -eu
@@ -54,5 +55,6 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable --now chezmoi-freshclam.timer
 sudo systemctl start chezmoi-freshclam.service
+{{ end -}}
 {{ end -}}
 {{ end -}}

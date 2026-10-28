@@ -1,4 +1,5 @@
-{{ if ne .profile "minimal" -}}
+{{ if ne .profile "config" -}}
+{{ if not (has .profile (list "minimal" "config")) -}}
 #!/bin/sh
 SETUP_OS={{ .chezmoi.os | quote }}
 SETUP_PROFILE={{ .profile | quote }}
@@ -17,4 +18,5 @@ if ! command -v aws >/dev/null 2>&1; then
   unzip -q "$work/aws.zip" -d "$work"
   "$work/aws/install" --install-dir "$HOME/.local/lib/aws-cli" --bin-dir "$HOME/.local/bin" --update
 fi
+{{ end -}}
 {{ end -}}

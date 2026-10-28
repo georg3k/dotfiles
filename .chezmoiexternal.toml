@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 # Shell
 [".local/share/oh-my-zsh"]
 type = "archive"
@@ -250,4 +251,5 @@ private = true
 refreshPeriod = "1ns"
 {{ end }}
 {{ end }}
+{{ end -}}
 {{ end -}}

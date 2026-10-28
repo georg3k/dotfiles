@@ -1,8 +1,10 @@
+{{ if ne .profile "config" -}}
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/sh
 set -eu
 {{ $settings := include "packages/iterm-ui.json" | fromJson -}}
 {{ range $key, $setting := $settings -}}
 defaults write com.googlecode.iterm2 {{ $key | quote }} -{{ $setting.type }} {{ if eq $setting.type "boolean" }}{{ if eq $setting.value "1" }}true{{ else }}false{{ end }}{{ else }}{{ $setting.value | quote }}{{ end }}
+{{ end -}}
 {{ end -}}
 {{ end -}}

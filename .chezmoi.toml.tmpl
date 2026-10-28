@@ -1,6 +1,6 @@
-{{- $profile := promptChoiceOnce . "profile" "Setup profile" (list "personal" "corporate" "minimal") "personal" -}}
-{{- if not (has $profile (list "personal" "corporate" "minimal")) -}}
-{{- fail "profile must be personal, corporate or minimal" -}}
+{{- $profile := promptChoiceOnce . "profile" "Setup profile" (list "personal" "corporate" "minimal" "config") "personal" -}}
+{{- if not (has $profile (list "personal" "corporate" "minimal" "config")) -}}
+{{- fail "profile must be personal, corporate, minimal or config" -}}
 {{- end -}}
 {{- if and (eq $profile "corporate") (ne .chezmoi.os "darwin") -}}
 {{- fail "corporate is macOS-only; use personal or minimal on Ubuntu" -}}
@@ -8,7 +8,7 @@
 {{- if and (eq $profile "minimal") (ne .chezmoi.os "linux") -}}
 {{- fail "minimal is Linux-only" -}}
 {{- end -}}
-{{ if ne $profile "minimal" -}}
+{{ if not (has $profile (list "minimal" "config")) -}}
 encryption = "age"
 
 [age]

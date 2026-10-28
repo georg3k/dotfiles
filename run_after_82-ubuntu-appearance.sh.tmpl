@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 {{ if and (eq .chezmoi.os "linux") (ne .profile "minimal") -}}
 #!/bin/sh
 set -eu
@@ -67,4 +68,5 @@ case "$(gsettings get org.gnome.desktop.interface color-scheme)" in
     ;;
 esac
 printf '%s\n' 'Rosé Pine configured. Log out/in once to load newly installed GNOME extensions, and reopen applications.'
+{{ end -}}
 {{ end -}}

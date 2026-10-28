@@ -1,5 +1,5 @@
 set -g focus-events on
-{{ if eq .profile "minimal" -}}
+{{ if has .profile (list "minimal" "config") -}}
 source-file ~/.config/tmux/rose-pine-main.conf
 {{ else -}}
 {{ if eq .chezmoi.os "darwin" -}}

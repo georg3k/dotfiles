@@ -1,7 +1,8 @@
+{{ if ne .profile "config" -}}
 #!/bin/sh
 set -eu
 export PATH="$HOME/.local/bin:$PATH"
-{{ if ne .profile "minimal" -}}
+{{ if not (has .profile (list "minimal" "config")) -}}
 {{ include ".private/check-path.age" | decrypt }}
 {{ end -}}
 printf '\nDeployment profile: %s\n' {{ .profile | quote }}
@@ -48,3 +49,4 @@ if [ "$missing" -ne 0 ]; then
 fi
 {{ end -}}
 printf '%s\n' 'Deployment hooks finished. Complete the single Post-deploy chapter in README; GUI launches and hardware still need validation.'
+{{ end -}}

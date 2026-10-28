@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/sh
 set -eu
@@ -24,4 +25,5 @@ defaults write NSGlobalDomain AppleIconAppearanceTintColor -string Other
 defaults write NSGlobalDomain AppleIconAppearanceCustomTintColor -string '0.5647058824 0.5490196078 0.6666666667 1.0'
 
 printf '%s\n' 'Rosé Pine tinted icons configured. Log out and back in to apply the icon appearance.'
+{{ end -}}
 {{ end -}}

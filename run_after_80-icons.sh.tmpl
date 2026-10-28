@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 {{ if and (eq .chezmoi.os "linux") (ne .profile "minimal") -}}
 #!/bin/sh
 set -eu
@@ -6,4 +7,5 @@ if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
 fi
 bash "$HOME/.local/share/tela-circle-source/install.sh" -d "$HOME/.local/share/icons" standard
 gsettings set org.gnome.desktop.interface icon-theme 'Tela-circle'
+{{ end -}}
 {{ end -}}

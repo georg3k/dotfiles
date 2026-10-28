@@ -1,6 +1,18 @@
+{{ if eq .profile "config" -}}
 typeset -U path PATH fpath
 path=("$HOME/.local/bin" $path)
-{{ if ne .profile "minimal" -}}
+export EDITOR={{ if lookPath "nvim" }}nvim{{ else }}vi{{ end }}
+export VISUAL="$EDITOR"
+setopt autocd nomatch
+unsetopt beep
+bindkey -e
+autoload -Uz compinit
+compinit
+PROMPT='%~ %# '
+{{ else -}}
+typeset -U path PATH fpath
+path=("$HOME/.local/bin" $path)
+{{ if not (has .profile (list "minimal" "config")) -}}
 {{ include ".private/shell-path.age" | decrypt }}
 {{ end -}}
 {{ if (eq .profile "corporate") -}}
@@ -48,4 +60,5 @@ source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.z
 {{ else -}}
 source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+{{ end -}}
 {{ end -}}

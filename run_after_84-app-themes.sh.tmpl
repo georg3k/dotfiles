@@ -1,3 +1,4 @@
+{{ if ne .profile "config" -}}
 {{ if ne .profile "minimal" -}}
 #!/bin/sh
 set -eu
@@ -21,4 +22,5 @@ if [ -f "$anki_addon/__init__.py" ]; then
 else
   printf '%s\n' 'Anki theme files staged; install ReColor in Anki, then apply again. See README Post-deploy.'
 fi
+{{ end -}}
 {{ end -}}
