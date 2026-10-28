@@ -1,0 +1,3 @@
+{{ if and (eq .profile "corporate") (eq .chezmoi.os "darwin") -}}
+{{ include ".private/trust-setup.age" | decrypt }}
+{{ end -}}
