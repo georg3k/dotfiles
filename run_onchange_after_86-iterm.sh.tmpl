@@ -6,5 +6,15 @@ set -eu
 {{ range $key, $setting := $settings -}}
 defaults write com.googlecode.iterm2 {{ $key | quote }} -{{ $setting.type }} {{ if eq $setting.type "boolean" }}{{ if eq $setting.value "1" }}true{{ else }}false{{ end }}{{ else }}{{ $setting.value | quote }}{{ end }}
 {{ end -}}
+
+mkdir -p "$HOME/.local/share/themes/rose-pine-iterm-custom"
+preset="$HOME/.local/share/themes/rose-pine-iterm-custom/rose-pine-contrast.itermcolors"
+cp "$HOME/.local/share/themes/rose-pine-iterm/rose-pine.itermcolors" "$preset"
+/usr/libexec/PlistBuddy -c 'Set :Cursor\ Color:Red\ Component 0.8784313725' "$preset"
+/usr/libexec/PlistBuddy -c 'Set :Cursor\ Color:Green\ Component 0.8705882353' "$preset"
+/usr/libexec/PlistBuddy -c 'Set :Cursor\ Color:Blue\ Component 0.9568627451' "$preset"
+/usr/libexec/PlistBuddy -c 'Set :Cursor\ Text\ Color:Red\ Component 0.0980392157' "$preset"
+/usr/libexec/PlistBuddy -c 'Set :Cursor\ Text\ Color:Green\ Component 0.0901960784' "$preset"
+/usr/libexec/PlistBuddy -c 'Set :Cursor\ Text\ Color:Blue\ Component 0.1411764706' "$preset"
 {{ end -}}
 {{ end -}}
