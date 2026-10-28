@@ -29,7 +29,8 @@ For secret decryption, place your **age** private key at `~/.config/chezmoi/age-
 - **Secrets:** enable Bitwarden's SSH agent; add your public key to GitHub
 - **Firefox:** enable Sync; apply Rosé Pine themes with automaticDark for light/dark switching
 - **iTerm:** restart iTerm after apply; select Fira Code; import presets from `~/.local/share/themes/rose-pine-iterm` (Main for dark, Dawn for light)
-- **Obsidian:** per vault, select Rosé Pine, "Adapt to system", Fira Code (staged files in `~/.local/share/themes/rose-pine-obsidian`)
+- **Obsidian:** per vault, select Rosé Pine, "Adapt to system", Fira Code (staged files in `~/.local/share/themes/rose-pine-obsidian`). CLI is bundled: enable Settings → General → Command line interface (requires installer 1.12.7+); chezmoi registers the bundled executable outside minimal mode. Keep Obsidian open while using CLI commands.
+- **Telegram (macOS):** install the pre-created [Rosé Pine Dawn](https://t.me/addtheme/t92mgwdG0XiynBSL) and [Rosé Pine](https://t.me/addtheme/m3iEr0CcgyZWEHbf) themes; use Dawn for daytime and Rosé Pine for Auto-Night → System Based.
 - **Telegram (Linux):** import theme from `~/.local/share/themes/rose-pine-telegram`
 - **Anki:** install ReColor (`688199788`), restart, re-apply chezmoi, select **Rosepine** in ReColor → Configuration → Themes; set Anki to follow system theme
 - **OBS:** Appearance → Rose Pine → Main/Dawn
@@ -39,7 +40,7 @@ For secret decryption, place your **age** private key at `~/.config/chezmoi/age-
 ## Manual exceptions
 
 - DaVinci Resolve (Linux): [vendor installer](https://www.blackmagicdesign.com/event/davinciresolvedownload), x86 only
-- Stremio (Linux): use the [web app](https://web.stremio.com/)
+- **Stremio (Linux):** official Flathub app, Ubuntu amd64 personal mode only. Updates: `flatpak update --user`.
 - ChatGPT/Telemost (Linux): use web apps
 - Remote desktop: Windows App or FreeRDP (macOS), Remmina (Linux)
 - Some vendor apps unavailable on ARM64

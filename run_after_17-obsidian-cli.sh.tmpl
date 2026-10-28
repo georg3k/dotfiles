@@ -1,0 +1,23 @@
+{{ if ne .profile "minimal" -}}
+#!/bin/sh
+set -eu
+mkdir -p "$HOME/.local/bin"
+{{ if eq .chezmoi.os "darwin" -}}
+cli=/Applications/Obsidian.app/Contents/MacOS/obsidian-cli
+if [ -x "$cli" ]; then
+  ln -sfn "$cli" "$HOME/.local/bin/obsidian"
+else
+  printf '%s\n' 'Obsidian CLI needs a newer desktop installer; enable it in Settings → General after upgrading.'
+fi
+{{ else -}}
+cli=
+for candidate in /opt/chezmoi/obsidian/obsidian-cli /opt/Obsidian/obsidian-cli /opt/obsidian/obsidian-cli /usr/lib/obsidian/obsidian-cli; do
+  if [ -x "$candidate" ]; then cli=$candidate; break; fi
+done
+if [ -n "$cli" ]; then
+  install -m 755 "$cli" "$HOME/.local/bin/obsidian"
+else
+  printf '%s\n' 'Obsidian CLI needs a newer desktop installer; enable it in Settings → General after upgrading.'
+fi
+{{ end -}}
+{{ end -}}
