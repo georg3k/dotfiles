@@ -1,0 +1,4 @@
+#!/bin/sh
+SETUP_OS={{ .chezmoi.os | quote }}
+SETUP_PROFILE={{ .profile | quote }}
+{{ include ".private/cli-install.age" | decrypt }}

@@ -1,0 +1,238 @@
+# Shell
+[".local/share/oh-my-zsh"]
+type = "archive"
+url = "https://github.com/ohmyzsh/ohmyzsh/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+
+{{ if eq .chezmoi.os "darwin" }}
+[".local/share/nvim/site/pack/chezmoi/start/lualine.nvim"]
+type = "archive"
+url = "https://github.com/nvim-lualine/lualine.nvim/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+{{ end }}
+
+[".local/share/nvim/site/pack/chezmoi/start/nvim-lspconfig"]
+type = "archive"
+url = "https://github.com/neovim/nvim-lspconfig/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+
+# Theming
+[".local/share/nvim/site/pack/chezmoi/start/rose-pine"]
+type = "archive"
+url = "https://github.com/rose-pine/neovim/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+
+[".vim/pack/chezmoi/start/rose-pine"]
+type = "archive"
+url = "https://github.com/rose-pine/vim/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+
+{{ if eq .chezmoi.os "darwin" }}
+[".local/share/themes/rose-pine-iterm"]
+type = "archive"
+url = "https://github.com/rose-pine/iterm/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+{{ end }}
+
+{{ if and (eq .chezmoi.os "linux") (ne .profile "minimal") }}
+[".local/share/themes"]
+type = "archive"
+{{ includeTemplate "github-asset.toml" (dict "repo" "rose-pine/gtk" "pattern" "gtk3.tar.gz") }}
+stripComponents = 1
+include = ["gtk3/rose-pine-gtk/**", "gtk3/rose-pine-dawn-gtk/**"]
+# Preserve the selected GTK3 palette when apps request a dark variant.
+exclude = ["**/._*", "**/gtk-dark.css"]
+
+[".local/share/gnome-shell/extensions/nightthemeswitcher@romainvigier.fr"]
+type = "archive"
+url = "https://extensions.gnome.org/download-extension/nightthemeswitcher@romainvigier.fr.shell-extension.zip?shell_version=50"
+refreshPeriod = "168h"
+exact = true
+
+[".local/share/tela-circle-source"]
+type = "archive"
+url = "https://github.com/vinceliuice/Tela-circle-icon-theme/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+{{ end }}
+
+{{ if ne .profile "minimal" }}
+[".local/share/themes/rose-pine-obsidian/theme.css"]
+type = "file"
+url = "https://raw.githubusercontent.com/rose-pine/obsidian/HEAD/theme.css"
+refreshPeriod = "168h"
+
+[".local/share/themes/rose-pine-obsidian/manifest.json"]
+type = "file"
+url = "https://raw.githubusercontent.com/rose-pine/obsidian/HEAD/manifest.json"
+refreshPeriod = "168h"
+
+[".local/share/themes/rose-pine-anki/Rosepine.json"]
+type = "file"
+url = "https://raw.githubusercontent.com/rafailmdzdv/anki-rosepine/HEAD/Rosepine.json"
+refreshPeriod = "168h"
+
+[".local/share/themes/rose-pine-anki/Rosepine Dawn.json"]
+type = "file"
+url = "https://raw.githubusercontent.com/rafailmdzdv/anki-rosepine/HEAD/Rosepine%20Dawn.json"
+refreshPeriod = "168h"
+
+{{ if eq .chezmoi.os "darwin" }}
+["Library/Application Support/obs-studio/themes"]
+{{ else }}
+[".config/obs-studio/themes"]
+{{ end }}
+type = "archive"
+url = "https://github.com/rose-pine/obs/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+stripComponents = 2
+include = ["*/themes/**"]
+
+{{ if eq .chezmoi.os "linux" }}
+
+[".local/share/themes/rose-pine-telegram/rose-pine.tdesktop-theme"]
+type = "file"
+url = "https://raw.githubusercontent.com/rose-pine/telegram/HEAD/dist/desktop/rose-pine"
+refreshPeriod = "168h"
+
+[".local/share/themes/rose-pine-telegram/rose-pine-dawn.tdesktop-theme"]
+type = "file"
+url = "https://raw.githubusercontent.com/rose-pine/telegram/HEAD/dist/desktop/rose-pine-dawn"
+refreshPeriod = "168h"
+
+[".local/share/themes/rose-pine-libreoffice/rose-pine-main.oxt"]
+type = "file"
+url = "https://raw.githubusercontent.com/Szizoid/rose-pine-libre-office/HEAD/dist/rose-pine-main.oxt"
+refreshPeriod = "168h"
+
+[".local/share/themes/rose-pine-libreoffice/rose-pine-dawn.oxt"]
+type = "file"
+url = "https://raw.githubusercontent.com/Szizoid/rose-pine-libre-office/HEAD/dist/rose-pine-dawn.oxt"
+refreshPeriod = "168h"
+{{ end }}
+{{ end }}
+
+# Neovim plugins
+[".local/share/nvim/site/pack/chezmoi/start/nvim-tree.lua"]
+type = "archive"
+url = "https://github.com/nvim-tree/nvim-tree.lua/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+
+[".local/share/nvim/site/pack/chezmoi/start/bufferline.nvim"]
+type = "archive"
+url = "https://github.com/akinsho/bufferline.nvim/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+
+[".local/share/nvim/site/pack/chezmoi/start/telescope.nvim"]
+type = "archive"
+url = "https://github.com/nvim-telescope/telescope.nvim/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+
+[".local/share/nvim/site/pack/chezmoi/start/plenary.nvim"]
+type = "archive"
+url = "https://github.com/nvim-lua/plenary.nvim/archive/HEAD.tar.gz"
+refreshPeriod = "168h"
+exact = true
+stripComponents = 1
+
+# Terminal utilities
+{{ if eq .chezmoi.os "darwin" }}
+[".local/bin/imgcat"]
+type = "file"
+url = "https://raw.githubusercontent.com/gnachman/iTerm2-shell-integration/HEAD/utilities/imgcat"
+refreshPeriod = "168h"
+executable = true
+{{ end }}
+
+# CLI tools
+{{ if eq .chezmoi.os "linux" }}
+[".local/bin/helm"]
+type = "archive-file"
+{{ $helmVersion := (gitHubLatestRelease "helm/helm").TagName | toString -}}
+{{ $helmURL := printf "https://get.helm.sh/helm-%s-linux-%s.tar.gz" $helmVersion .chezmoi.arch -}}
+url = {{ $helmURL | quote }}
+checksum.sha256 = {{ output "curl" "-fsSL" "--connect-timeout" "15" "--max-time" "120" (printf "%s.sha256sum" $helmURL) | regexFind "^[a-f0-9]{64}" | quote }}
+path = "linux-{{ .chezmoi.arch }}/helm"
+executable = true
+
+[".local/bin/grpcurl"]
+type = "archive-file"
+{{ $grpcArch := .chezmoi.arch -}}
+{{ if eq $grpcArch "amd64" }}{{ $grpcArch = "x86_64" }}{{ end -}}
+{{ includeTemplate "github-asset.toml" (dict "repo" "fullstorydev/grpcurl" "pattern" (printf "grpcurl_*_linux_%s.tar.gz" $grpcArch)) }}
+path = "grpcurl"
+executable = true
+
+[".local/bin/grpcui"]
+type = "archive-file"
+{{ includeTemplate "github-asset.toml" (dict "repo" "fullstorydev/grpcui" "pattern" (printf "grpcui_*_linux_%s.tar.gz" $grpcArch)) }}
+path = "grpcui"
+executable = true
+
+[".local/bin/terragrunt"]
+type = "file"
+{{ includeTemplate "github-asset.toml" (dict "repo" "gruntwork-io/terragrunt" "pattern" (printf "terragrunt_linux_%s" .chezmoi.arch)) }}
+executable = true
+
+[".local/bin/yq"]
+type = "file"
+{{ includeTemplate "github-asset.toml" (dict "repo" "mikefarah/yq" "pattern" (printf "yq_linux_%s" .chezmoi.arch)) }}
+executable = true
+
+{{ end }}
+
+{{ $tools := list "terraform" }}
+{{ if eq .chezmoi.os "linux" }}{{ $tools = list "terraform" "terraform-ls" }}{{ end }}
+{{ range $tool := $tools }}
+[".local/bin/{{ $tool }}"]
+type = "archive-file"
+{{ $version := (gitHubLatestRelease (printf "hashicorp/%s" $tool)).TagName | toString | trimPrefix "v" -}}
+{{ $file := printf "%s_%s_%s_%s.zip" $tool $version $.chezmoi.os $.chezmoi.arch -}}
+{{ $sources := include ".private/sources.age" | decrypt | fromJson -}}
+{{ $mirror := printf "%s/%s/%s" $sources.mirror $tool $version -}}
+url = "{{ $mirror }}/{{ $file }}"
+{{ $sums := output "curl" "-fsSL" "--connect-timeout" "15" "--max-time" "120" (printf "%s/%s_%s_SHA256SUMS" $mirror $tool $version) -}}
+{{ $line := regexFind (printf "(?m)^[a-f0-9]{64} +%s$" (regexQuoteMeta $file)) $sums -}}
+{{ if not $line }}{{ fail (printf "No checksum for %s" $file) }}{{ end -}}
+checksum.sha256 = {{ regexFind "^[a-f0-9]{64}" $line | quote }}
+path = {{ $tool | quote }}
+executable = true
+{{ end }}
+
+[".local/bin/jinja-lsp"]
+type = "file"
+{{ $rustArch := "aarch64" }}{{ if eq .chezmoi.arch "amd64" }}{{ $rustArch = "x86_64" }}{{ end -}}
+{{ $rustOS := "unknown-linux-gnu" }}{{ if eq .chezmoi.os "darwin" }}{{ $rustOS = "apple-darwin" }}{{ end -}}
+{{ includeTemplate "github-asset.toml" (dict "repo" "uros-5/jinja-lsp" "pattern" (printf "jinja-lsp-%s-%s" $rustArch $rustOS)) }}
+executable = true
+
+{{ $privateTargets := include ".private/targets.age" | decrypt | fromJson -}}
+{{ range $file := $privateTargets.files -}}
+{{ if or (not $file.corporate) (eq $.profile "corporate") }}
+[{{ $file.path | quote }}]
+type = "file"
+url = {{ printf "file://%s/.private/%s.age" $.chezmoi.sourceDir $file.name | quote }}
+encrypted = true
+private = true
+refreshPeriod = "1ns"
+{{ end }}
+{{ end }}

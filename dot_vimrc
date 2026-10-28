@@ -1,0 +1,39 @@
+unlet! skip_defaults_vim
+if filereadable($VIMRUNTIME . '/defaults.vim')
+  source $VIMRUNTIME/defaults.vim
+else
+  set nocompatible
+  filetype plugin indent on
+  syntax enable
+endif
+
+set number
+set ignorecase smartcase
+" Indentation remains filetype/project-specific. No plugin manager or remaps.
+
+" Load the native Vim package before selecting its colorscheme.
+packadd rose-pine
+set termguicolors
+function! RosePineAppearance() abort
+  if has('macunix')
+    let preference = system('defaults read -g AppleInterfaceStyle 2>/dev/null')
+  elseif executable('gsettings') && (!empty($DISPLAY) || !empty($WAYLAND_DISPLAY))
+    let preference = system('gsettings get org.gnome.desktop.interface color-scheme')
+  else
+    set background=dark
+    colorscheme rosepine
+    return
+  endif
+  if preference =~? 'dark'
+    set background=dark
+    colorscheme rosepine
+  else
+    set background=light
+    colorscheme rosepine_dawn
+  endif
+endfunction
+call RosePineAppearance()
+augroup RosePineAppearance
+  autocmd!
+  autocmd FocusGained * call RosePineAppearance()
+augroup END

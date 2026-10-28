@@ -1,0 +1,58 @@
+{{ if ne .profile "minimal" -}}
+#!/bin/sh
+set -eu
+# Mirrors: {{ include ".chezmoitemplates/freshclam-mirrors.conf" | sha256sum }}
+{{ if eq .chezmoi.os "darwin" -}}
+# Config: {{ include "dot_config/clamav/freshclam.conf.tmpl" | sha256sum }}
+# Agent: {{ include "Library/LaunchAgents/org.clamav.freshclam.plist.tmpl" | sha256sum }}
+{{ if eq .chezmoi.arch "arm64" -}}
+brew=/opt/homebrew/bin/brew
+{{ else -}}
+brew=/usr/local/bin/brew
+{{ end -}}
+brew_prefix=$("$brew" --prefix)
+mkdir -p "$brew_prefix/var/lib/clamav" "$HOME/.local/state/clamav"
+service="gui/$(id -u)/org.clamav.freshclam"
+if launchctl print "$service" >/dev/null 2>&1; then
+  launchctl bootout "$service"
+fi
+launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/org.clamav.freshclam.plist"
+{{ else if eq .chezmoi.os "linux" -}}
+sudo systemctl disable --now clamav-freshclam.service
+config=$(mktemp)
+trap 'rm -f "$config"' 0
+sudo sed '/^[[:space:]]*PrivateMirror[[:space:]]/d' /etc/clamav/freshclam.conf > "$config"
+cat >> "$config" <<'EOF'
+{{ include ".chezmoitemplates/freshclam-mirrors.conf" | trim }}
+EOF
+sudo install -o root -g clamav -m 640 "$config" /etc/clamav/freshclam.conf
+sudo -u clamav test -r /etc/clamav/freshclam.conf
+sudo tee /etc/systemd/system/chezmoi-freshclam.service >/dev/null <<'EOF'
+[Unit]
+Description=Update ClamAV signatures
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=clamav
+TimeoutStartSec=30min
+ExecStart=/usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
+EOF
+sudo tee /etc/systemd/system/chezmoi-freshclam.timer >/dev/null <<'EOF'
+[Unit]
+Description=Update ClamAV signatures every two hours
+
+[Timer]
+OnCalendar=*-*-* 00/2:00:00
+RandomizedDelaySec=15m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable --now chezmoi-freshclam.timer
+sudo systemctl start chezmoi-freshclam.service
+{{ end -}}
+{{ end -}}

@@ -1,0 +1,50 @@
+{{- if not (has .chezmoi.os (list "darwin" "linux")) -}}
+{{- fail "This project supports macOS or Ubuntu Linux" -}}
+{{- end -}}
+{{- if not (has .chezmoi.arch (list "amd64" "arm64")) -}}
+{{- fail "This project supports amd64 or arm64" -}}
+{{- end -}}
+{{- if hasKey . "corporate" -}}
+{{- fail "Legacy corporate boolean found: run chezmoi init --prompt to select a profile before applying" -}}
+{{- end -}}
+{{- if not (has .profile (list "personal" "corporate" "minimal")) -}}
+{{- fail "profile must be personal, corporate or minimal" -}}
+{{- end -}}
+{{- if and (eq .profile "corporate") (ne .chezmoi.os "darwin") -}}
+{{- fail "corporate is macOS-only" -}}
+{{- end -}}
+{{- if and (eq .profile "minimal") (ne .chezmoi.os "linux") -}}
+{{- fail "minimal is Linux-only" -}}
+{{- end }}
+# Installer inputs and documentation belong to the source, not the home folder.
+packages/**
+README.md
+.gitignore
+
+
+{{ if ne .chezmoi.os "linux" }}
+.config/icedtea-web/**
+{{ end }}
+
+{{ if ne .chezmoi.os "darwin" }}
+Library/Application Support/Code/**
+Library/LaunchAgents/org.clamav.freshclam.plist
+.config/clamav/**
+{{ end }}
+{{ if or (ne .chezmoi.os "linux") (eq .profile "minimal") }}
+.config/Code/**
+.config/gtk-4.0/**
+.local/share/org.gnome.Ptyxis/**
+.local/share/themes/RosePine/**
+.local/share/themes/RosePine-Dawn/**
+.local/share/themes/rose-pine-gtk/**
+.local/share/themes/rose-pine-dawn-gtk/**
+{{ end }}
+
+{{ if eq .profile "minimal" }}
+# No desktop account/agent configuration in minimal.
+.ssh/**
+{{ end }}
+
+# Generated locally by glib-compile-schemas.
+.local/share/gnome-shell/extensions/nightthemeswitcher@romainvigier.fr/schemas/gschemas.compiled

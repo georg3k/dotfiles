@@ -1,0 +1,43 @@
+#!/bin/sh
+set -eu
+{{ include ".private/check-path.age" | decrypt }}
+printf '\nDeployment profile: %s\n' {{ .profile | quote }}
+{{ if eq .chezmoi.os "linux" -}}
+missing=0
+for command in zsh nvim tmux podman kubectl helm terraform terraform-ls terragrunt grpcurl grpcui yq bw {{ include ".private/check-tools.age" | decrypt | trim }} jinja-lsp java javaws hugo; do
+  if ! command -v "$command" >/dev/null 2>&1; then
+    printf 'MISSING: %s\n' "$command" >&2
+    missing=1
+  fi
+done
+{{ if eq .profile "personal" -}}
+{{ $manifest := includeTemplate "linux-desktop.toml" . | fromToml -}}
+{{ range $app := $manifest.apps -}}
+{{ if eq $app.kind "deb" -}}
+if [ "$(dpkg-query -W -f='${Status}' {{ $app.package | quote }} 2>/dev/null || :)" != 'install ok installed' ]; then
+  printf '%s\n' 'MISSING: {{ $app.name }}' >&2; missing=1
+fi
+{{ else if eq $app.kind "qt-installer" -}}
+if [ ! -x /opt/AmneziaVPN/client/AmneziaVPN ]; then
+  printf '%s\n' 'MISSING: AmneziaVPN' >&2; missing=1
+fi
+{{ else -}}
+if ! command -v {{ $app.name | quote }} >/dev/null 2>&1; then
+  printf '%s\n' 'MISSING: {{ $app.name }}' >&2; missing=1
+fi
+{{ end -}}
+{{ end -}}
+{{ if eq .chezmoi.arch "arm64" -}}
+if ! snap list telegram-desktop >/dev/null 2>&1; then
+  printf '%s\n' 'MISSING: Telegram Desktop ARM64 snap' >&2; missing=1
+fi
+printf '%s\n' 'ARM64 exceptions: Some vendor apps have no reviewed native ARM64 installer in this project.'
+{{ end -}}
+printf '%s\n' 'Vendor limitations: Native media package compatibility and Resolve require the README Post-deploy steps.'
+{{ end -}}
+if [ "$missing" -ne 0 ]; then
+  printf '%s\n' 'Deployment is incomplete. Fix the listed installation failure; see README for rerunning hooks.' >&2
+  exit 1
+fi
+{{ end -}}
+printf '%s\n' 'Deployment hooks finished. Complete the single Post-deploy chapter in README; GUI launches and hardware still need validation.'

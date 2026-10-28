@@ -1,0 +1,49 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/bin/sh
+set -eu
+. /etc/os-release
+if [ "$ID" != ubuntu ] || [ "$VERSION_ID" != 26.04 ]; then
+  printf '%s\n' 'This setup requires Ubuntu 26.04.' >&2
+  exit 1
+fi
+sudo env DEBIAN_FRONTEND=noninteractive apt-get update
+sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates curl gnupg
+{{ if and (eq .profile "personal") (eq .chezmoi.arch "amd64") }}
+sudo dpkg --add-architecture i386
+sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
+sudo add-apt-repository --yes multiverse
+{{ end }}
+download=$(mktemp -d)
+trap 'rm -rf "$download"' 0
+
+# Kubernetes publishes a separate signed repository for each minor release.
+release=$(curl -fsSL --connect-timeout 15 --max-time 120 https://dl.k8s.io/release/stable.txt)
+printf '%s\n' "$release" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+minor=${release%.*}
+curl -fsSL --connect-timeout 15 --max-time 120 \
+  "https://pkgs.k8s.io/core:/stable:/$minor/deb/Release.key" -o "$download/kubernetes.asc"
+sudo install -D -m 644 "$download/kubernetes.asc" /etc/apt/keyrings/kubernetes.asc
+sudo tee /etc/apt/sources.list.d/kubernetes.sources >/dev/null <<EOF
+Types: deb
+URIs: https://pkgs.k8s.io/core:/stable:/$minor/deb/
+Suites: /
+Signed-By: /etc/apt/keyrings/kubernetes.asc
+EOF
+
+{{ if eq .profile "personal" -}}
+curl -fsSL --connect-timeout 15 --max-time 120 \
+  https://packages.microsoft.com/keys/microsoft.asc -o "$download/microsoft.asc"
+sudo install -D -m 644 "$download/microsoft.asc" /etc/apt/keyrings/microsoft.asc
+sudo tee /etc/apt/sources.list.d/vscode.sources >/dev/null <<'EOF'
+Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: amd64 arm64
+Signed-By: /etc/apt/keyrings/microsoft.asc
+EOF
+{{ if eq .chezmoi.arch "amd64" -}}
+{{ include ".private/repository.age" | decrypt }}
+{{ end -}}
+{{ end -}}
+{{ end -}}

@@ -1,0 +1,49 @@
+typeset -U path PATH fpath
+path=("$HOME/.local/bin" $path)
+{{ include ".private/shell-path.age" | decrypt }}
+{{ if (eq .profile "corporate") -}}
+{{ include ".private/shell-corporate-path.age" | decrypt }}
+{{ end -}}
+if [[ "$OSTYPE" == darwin* ]]; then
+  if [[ -x /opt/homebrew/bin/brew ]]; then
+    path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
+    fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+  elif [[ -x /usr/local/bin/brew ]]; then
+    path=(/usr/local/bin /usr/local/sbin $path)
+    fpath=(/usr/local/share/zsh/site-functions $fpath)
+  fi
+fi
+path=("$HOME/.local/bin" $path)
+export PATH
+fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
+
+export ZSH="$HOME/.local/share/oh-my-zsh"
+ZSH_CUSTOM="$HOME/.config/zsh/custom"
+ZSH_CACHE_DIR="$HOME/.cache/oh-my-zsh"
+ZSH_COMPDUMP="$ZSH_CACHE_DIR/.zcompdump-$ZSH_VERSION"
+ZSH_THEME={{ .shellTheme | quote }}
+plugins=({{ range .shellPlugins }}{{ . | quote }} {{ end }})
+zstyle ':omz:update' mode disabled
+
+source "$ZSH/oh-my-zsh.sh"
+export EDITOR=nvim VISUAL=nvim
+
+setopt autocd nomatch # A directory alone means cd; unmatched globs are errors.
+unsetopt beep         # No audible terminal bell.
+bindkey -e            # Standard Emacs-style shell editing, including Ctrl+R.
+
+{{ if eq .shellTheme "agnoster" -}}
+prompt_context() { :; }
+{{ end -}}
+{{ if (eq .profile "corporate") -}}
+{{ include ".private/shell-completions.age" | decrypt }}
+{{ end -}}
+[[ ! -r "$HOME/.config/zsh/local.zsh" ]] || source "$HOME/.config/zsh/local.zsh"
+
+{{ if eq .chezmoi.os "darwin" -}}
+source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+{{ else -}}
+source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+{{ end -}}

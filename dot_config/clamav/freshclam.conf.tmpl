@@ -1,0 +1,7 @@
+# Options: https://docs.clamav.net/manual/Usage/SignatureManagement.html
+{{ include ".chezmoitemplates/freshclam-mirrors.conf" | trim }}
+DatabaseOwner {{ .chezmoi.username }}
+UpdateLogFile {{ joinPath .chezmoi.homeDir ".local/state/clamav/freshclam.log" | quote }}
+LogTime yes
+LogFileMaxSize 2M
+LogRotate yes

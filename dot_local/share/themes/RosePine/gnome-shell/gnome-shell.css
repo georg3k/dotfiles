@@ -1,0 +1,21 @@
+/* Small colour overlay on GNOME's stock Shell stylesheet.
+ * Rosé Pine palette: https://rosepinetheme.com/palette/
+ * User Themes retains the system's default stylesheet underneath this file. */
+#panel { background-color: #191724; color: #e0def4; }
+.popup-menu-content, .candidate-popup-content,
+.modal-dialog, .notification-banner, .message-dialog-content {
+  background-color: #26233a;
+  color: #e0def4;
+}
+.quick-toggle:checked, .quick-menu-toggle .quick-toggle:checked,
+.slider, .workspace-dot {
+  color: #c4a7e7;
+}
+.quick-toggle:checked, .quick-menu-toggle .quick-toggle:checked {
+  background-color: #c4a7e7;
+  color: #191724;
+}
+.popup-menu-item:focus, .popup-menu-item:hover {
+  background-color: #191724;
+  color: #e0def4;
+}

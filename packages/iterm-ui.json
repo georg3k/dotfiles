@@ -1,0 +1,50 @@
+{
+  "HideTab": {
+    "type": "boolean",
+    "value": "0"
+  },
+  "ShowFullScreenTabBar": {
+    "type": "boolean",
+    "value": "1"
+  },
+  "UseBorder": {
+    "type": "boolean",
+    "value": "1"
+  },
+  "HideScrollbar": {
+    "type": "boolean",
+    "value": "0"
+  },
+  "DimBackgroundWindows": {
+    "type": "boolean",
+    "value": "0"
+  },
+  "DimOnlyText": {
+    "type": "boolean",
+    "value": "0"
+  },
+  "SplitPaneDimmingAmount": {
+    "type": "float",
+    "value": "0.15"
+  },
+  "FocusFollowsMouse": {
+    "type": "boolean",
+    "value": "0"
+  },
+  "CopySelection": {
+    "type": "boolean",
+    "value": "0"
+  },
+  "QuitWhenAllWindowsClosed": {
+    "type": "boolean",
+    "value": "1"
+  },
+  "OpenNoWindowsAtStartup": {
+    "type": "boolean",
+    "value": "0"
+  },
+  "OpenArrangementAtStartup": {
+    "type": "boolean",
+    "value": "0"
+  }
+}

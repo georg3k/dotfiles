@@ -1,0 +1,52 @@
+#!/bin/sh
+set -eu
+{{ if eq .chezmoi.os "darwin" -}}
+shell_path=/bin/zsh
+current_shell=$(dscl . -read "/Users/$(id -un)" UserShell | awk '{print $2}')
+defaults write com.apple.dock mru-spaces -bool false
+# Preserve the few non-default desktop preferences.
+defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0
+defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0
+defaults write com.apple.finder FXPreferredViewStyle -string Nlsv
+defaults write com.apple.dock tilesize -int 61
+defaults write com.apple.dock show-recents -bool false
+
+# U.S., Russian and Japanese input, with native auxiliary input methods.
+defaults write com.apple.HIToolbox AppleEnabledInputSources -array \
+  '<dict><key>InputSourceKind</key><string>Keyboard Layout</string><key>KeyboardLayout ID</key><integer>0</integer><key>KeyboardLayout Name</key><string>U.S.</string></dict>' \
+  '<dict><key>InputSourceKind</key><string>Keyboard Layout</string><key>KeyboardLayout ID</key><integer>19456</integer><key>KeyboardLayout Name</key><string>Russian</string></dict>' \
+  '{InputSourceKind="Non Keyboard Input Method"; "Bundle ID"="com.apple.CharacterPaletteIM";}' \
+  '{InputSourceKind="Input Mode"; "Bundle ID"="com.apple.inputmethod.Kotoeri.RomajiTyping"; "Input Mode"="com.apple.inputmethod.Japanese";}' \
+  '{InputSourceKind="Keyboard Input Method"; "Bundle ID"="com.apple.inputmethod.Kotoeri.RomajiTyping";}' \
+  '{InputSourceKind="Non Keyboard Input Method"; "Bundle ID"="com.apple.50onPaletteIM";}' \
+  '{InputSourceKind="Non Keyboard Input Method"; "Bundle ID"="com.apple.PressAndHold";}'
+
+{{ else -}}
+shell_path=/usr/bin/zsh
+current_shell=$(getent passwd "$(id -un)" | cut -d: -f7)
+sudo update-alternatives --set editor /usr/bin/nvim
+{{ if ne .profile "minimal" -}}
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+  exec dbus-run-session -- sh "$0"
+fi
+if [ "$(systemctl get-default)" = multi-user.target ]; then
+  sudo systemctl set-default graphical.target
+fi
+gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
+gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
+gsettings set org.gnome.desktop.peripherals.touchpad click-method 'fingers'
+gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll true
+gsettings set org.gnome.desktop.peripherals.mouse natural-scroll true
+gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'ru'), ('ibus', 'mozc-jp')]"
+gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
+gsettings set org.gnome.desktop.interface clock-show-seconds true
+gsettings set org.gnome.desktop.interface clock-show-date true
+gsettings set org.gnome.desktop.interface clock-show-weekday true
+
+{{ end -}}
+{{ end -}}
+if [ "$current_shell" != "$shell_path" ]; then
+  chsh -s "$shell_path"
+fi

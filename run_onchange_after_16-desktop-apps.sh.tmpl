@@ -1,0 +1,113 @@
+{{ if and (eq .chezmoi.os "linux") (eq .profile "personal") -}}
+#!/bin/sh
+set -eu
+# Official vendor assets: {{ includeTemplate "linux-desktop.toml" . | sha256sum }}
+export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
+arch=$(dpkg --print-architecture)
+work=$(mktemp -d)
+trap 'rm -rf "$work"' 0
+
+download() {
+  printf 'Downloading %s\n' "$1"
+  curl -fL --retry 2 --connect-timeout 15 --max-time 1800 "$2" -o "$work/$1"
+  if [ -n "$3" ]; then printf '%s  %s\n' "$3" "$work/$1" | sha256sum --check --status; fi
+}
+
+install_deb() {
+  name=$1 url=$2 digest=$3
+  if [ "$(dpkg-query -W -f='${Status}' "$name" 2>/dev/null || :)" = 'install ok installed' ]; then return; fi
+  download "$name.deb" "$url" "$digest"
+  test "$(dpkg-deb -f "$work/$name.deb" Package)" = "$name"
+  package_arch=$(dpkg-deb -f "$work/$name.deb" Architecture)
+  test "$package_arch" = "$arch" || test "$package_arch" = all
+  sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y "$work/$name.deb"
+}
+
+desktop_entry() {
+  mkdir -p "$HOME/.local/share/applications"
+  cat > "$HOME/.local/share/applications/chezmoi-$name.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=$name
+Exec=$target/$binary %U
+Icon=$icon
+Terminal=false
+Categories=Utility;
+EOF
+}
+
+install_archive() {
+  name=$1 url=$2 digest=$3 strip=$4 binary=$5 icon=$6
+  target="/opt/chezmoi/$name"
+  if [ ! -f "$target/.chezmoi-installed" ]; then
+    if command -v "$name" >/dev/null 2>&1; then return; fi
+    download "$name.tar" "$url" "$digest"
+    mkdir -p "$work/$name"
+    tar -xf "$work/$name.tar" --strip-components="$strip" -C "$work/$name"
+    test -x "$work/$name/$binary"
+    sudo install -d "$target"
+    sudo cp -a "$work/$name/." "$target/"
+    sudo chown -R root:root "$target"
+    # Electron's supplied setuid sandbox, never --no-sandbox or a global sysctl.
+    if [ -f "$target/chrome-sandbox" ]; then sudo chmod 4755 "$target/chrome-sandbox"; fi
+    sudo touch "$target/.chezmoi-installed"
+  fi
+  mkdir -p "$HOME/.local/bin"
+  ln -sfn "$target/$binary" "$HOME/.local/bin/$name"
+  if [ -n "$icon" ]; then icon="$target/$icon"; else icon=application-x-executable; fi
+  desktop_entry
+}
+
+install_appimage() {
+  name=$1 url=$2 digest=$3
+  target="/opt/chezmoi/$name" binary="$name.AppImage" icon=application-x-executable
+  if [ ! -f "$target/.chezmoi-installed" ]; then
+    if command -v "$name" >/dev/null 2>&1; then return; fi
+    download "$name.AppImage" "$url" "$digest"
+    sudo install -D -m 755 "$work/$name.AppImage" "$target/$binary"
+    sudo touch "$target/.chezmoi-installed"
+  fi
+  mkdir -p "$HOME/.local/bin"
+  ln -sfn "$target/$binary" "$HOME/.local/bin/$name"
+  desktop_entry
+}
+
+install_anki() {
+  if command -v anki >/dev/null 2>&1; then return; fi
+  download anki.tar.zst "$1" "$2"
+  mkdir -p "$work/anki"
+  tar -xf "$work/anki.tar.zst" --strip-components=1 -C "$work/anki"
+  (cd "$work/anki" && sudo env DEBIAN_FRONTEND=noninteractive bash ./install.sh)
+  test -x /usr/local/bin/anki
+}
+
+install_amnezia() {
+  if [ -x /opt/AmneziaVPN/client/AmneziaVPN ]; then return; fi
+  download AmneziaVPN.run "$1" "$2"
+  chmod 755 "$work/AmneziaVPN.run"
+  sudo env QT_QPA_PLATFORM=offscreen "$work/AmneziaVPN.run" \
+    --root /opt/AmneziaVPN --accept-licenses --default-answer --confirm-command install
+  test -x /opt/AmneziaVPN/client/AmneziaVPN
+}
+
+{{ $manifest := includeTemplate "linux-desktop.toml" . | fromToml -}}
+{{ range $app := $manifest.apps -}}
+{{ if eq $app.kind "deb" -}}
+install_deb {{ $app.package | quote }} {{ $app.url | quote }} {{ get $app "sha256" | default "" | quote }}
+{{ else if eq $app.kind "tar" -}}
+install_archive {{ $app.name | quote }} {{ $app.url | quote }} {{ get $app "sha256" | default "" | quote }} {{ $app.strip }} {{ $app.binary | quote }} {{ $app.icon | quote }}
+{{ else if eq $app.kind "appimage" -}}
+install_appimage {{ $app.name | quote }} {{ $app.url | quote }} {{ get $app "sha256" | default "" | quote }}
+{{ else if eq $app.kind "qt-installer" -}}
+install_amnezia {{ $app.url | quote }} {{ get $app "sha256" | default "" | quote }}
+{{ else if eq $app.kind "anki" -}}
+install_anki {{ $app.url | quote }} {{ get $app "sha256" | default "" | quote }}
+{{ end -}}
+{{ end -}}
+if [ "$arch" = arm64 ]; then
+  # Official verified Telegram publisher; no upstream ARM64 tarball exists.
+  if ! snap list telegram-desktop >/dev/null 2>&1; then sudo snap install telegram-desktop; fi
+fi
+
+{{ include ".private/media-vendor.age" | decrypt }}
+{{ end -}}

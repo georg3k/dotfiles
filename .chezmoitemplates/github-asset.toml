@@ -1,0 +1,12 @@
+{{- $checksumKey := get . "checksumKey" | default "checksum.sha256" -}}
+{{- $url := gitHubLatestReleaseAssetURL .repo .pattern -}}
+{{- if not $url -}}{{ fail (printf "No release asset matching %s in %s" .pattern .repo) }}{{- end -}}
+{{- printf "url = %q\n" $url -}}
+{{- range (gitHubLatestRelease .repo | toJson | fromJson).assets -}}
+{{- if eq .browser_download_url $url -}}
+{{- $digest := get . "digest" | default "" -}}
+{{- if hasPrefix "sha256:" $digest -}}
+{{- printf "%s = %q\n" $checksumKey (trimPrefix "sha256:" $digest) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

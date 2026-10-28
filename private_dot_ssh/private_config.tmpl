@@ -1,0 +1,9 @@
+Host github.com
+    User git
+    IdentityAgent ~/.bitwarden-ssh-agent.sock
+
+{{ if eq .profile "corporate" -}}
+{{ include ".private/ssh.age" | decrypt }}
+{{ end -}}
+Host *
+    Include {{ joinPath .chezmoi.homeDir ".ssh" "config.local" | quote }}

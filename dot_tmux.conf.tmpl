@@ -1,0 +1,14 @@
+set -g focus-events on
+{{ if eq .profile "minimal" -}}
+source-file ~/.config/tmux/rose-pine-main.conf
+{{ else -}}
+{{ if eq .chezmoi.os "darwin" -}}
+{{ $check := "defaults read -g AppleInterfaceStyle 2>/dev/null | grep -qi dark" -}}
+if-shell '{{ $check }}' 'source-file ~/.config/tmux/rose-pine-main.conf' 'source-file ~/.config/tmux/rose-pine-dawn.conf'
+set-hook -g client-focus-in "if-shell '{{ $check }}' 'source-file ~/.config/tmux/rose-pine-main.conf' 'source-file ~/.config/tmux/rose-pine-dawn.conf'"
+{{ else -}}
+{{ $check := "gsettings get org.gnome.desktop.interface color-scheme | grep -q dark" -}}
+if-shell '{{ $check }}' 'source-file ~/.config/tmux/rose-pine-main.conf' 'source-file ~/.config/tmux/rose-pine-dawn.conf'
+set-hook -g client-focus-in "if-shell '{{ $check }}' 'source-file ~/.config/tmux/rose-pine-main.conf' 'source-file ~/.config/tmux/rose-pine-dawn.conf'"
+{{ end -}}
+{{ end -}}

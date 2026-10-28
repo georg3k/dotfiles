@@ -1,0 +1,135 @@
+-- Shared macOS/Linux baseline; requires Neovim >= 0.11.3.
+vim.g.mapleader = " "
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.opt.number = true
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.opt.termguicolors = true
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+vim.opt.completeopt = { "menu", "menuone", "noselect" }
+
+-- Options: https://github.com/rose-pine/neovim#options
+require("rose-pine").setup({ variant = "auto", dark_variant = "main" })
+-- Project-specific OS appearance integration.
+local function appearance()
+  local command = vim.fn.has("macunix") == 1
+      and { "defaults", "read", "-g", "AppleInterfaceStyle" }
+      or { "gsettings", "get", "org.gnome.desktop.interface", "color-scheme" }
+  if vim.fn.executable(command[1]) == 0
+      or (vim.fn.has("macunix") == 0 and not vim.env.DISPLAY and not vim.env.WAYLAND_DISPLAY) then
+    vim.o.background = "dark"
+    vim.cmd.colorscheme("rose-pine")
+    return
+  end
+  vim.system(command, { text = true }, vim.schedule_wrap(function(result)
+    local dark = (result.stdout or ""):lower():find("dark", 1, true) ~= nil
+    vim.o.background = dark and "dark" or "light"
+    vim.cmd.colorscheme("rose-pine")
+  end))
+end
+appearance()
+vim.api.nvim_create_autocmd("FocusGained", { callback = appearance })
+
+-- Adapted defaults: https://github.com/nvim-lualine/lualine.nvim#default-configuration
+require("lualine").setup({
+  options = {
+    theme = "auto", -- Follow the Rosé Pine editor colorscheme.
+    icons_enabled = false, -- Only Powerline separators; no extra icon plugin.
+    section_separators = { left = "", right = "" },
+    component_separators = { left = "", right = "" },
+  },
+  sections = {
+    lualine_a = { "mode" },
+    lualine_b = { "branch", "diff", "diagnostics" },
+    lualine_c = { "filename" },
+    lualine_x = { "encoding", "filetype" },
+    lualine_y = { "progress" },
+    lualine_z = { "location" },
+  },
+})
+
+-- Fira Code is not a Nerd Font, so optional file icons are disabled.
+-- Setup/options: https://github.com/nvim-tree/nvim-tree.lua#setup
+require("nvim-tree").setup({
+  renderer = { icons = { show = {
+    file = false, folder = false, folder_arrow = false,
+    git = false, modified = false, diagnostics = false, bookmarks = false,
+  } } },
+})
+-- Options: https://github.com/akinsho/bufferline.nvim#configuration
+require("bufferline").setup({ options = {
+  show_buffer_icons = false,
+  show_buffer_close_icons = false,
+  show_close_icon = false,
+  modified_icon = "*",
+  indicator = { style = "underline" },
+  offsets = { { filetype = "NvimTree", text = "Files" } },
+} })
+-- Setup/keymaps: https://github.com/nvim-telescope/telescope.nvim#usage
+require("telescope").setup({})
+vim.keymap.set("n", "<leader>e", "<Cmd>NvimTreeToggle<CR>", { desc = "File explorer" })
+vim.keymap.set("n", "<leader>ff", require("telescope.builtin").find_files, { desc = "Find files" })
+vim.keymap.set("n", "<leader>fg", require("telescope.builtin").live_grep, { desc = "Search text" })
+vim.keymap.set("n", "<leader>fb", require("telescope.builtin").buffers, { desc = "Find buffer" })
+vim.keymap.set("n", "[b", "<Cmd>bprevious<CR>", { desc = "Previous buffer" })
+vim.keymap.set("n", "]b", "<Cmd>bnext<CR>", { desc = "Next buffer" })
+
+vim.filetype.add({
+  extension = { j2 = "jinja", jinja2 = "jinja", sls = "salt" },
+  pattern = {
+    [".*/playbooks/.*%.ya?ml"] = "yaml.ansible",
+    [".*/roles/.*/tasks/.*%.ya?ml"] = "yaml.ansible",
+    [".*/roles/.*/handlers/.*%.ya?ml"] = "yaml.ansible",
+    [".*/nginx/.*%.conf"] = "nginx",
+  },
+})
+
+-- Homebrew LLVM is keg-only. Select its clangd without changing the shell PATH.
+if vim.fn.has("macunix") == 1 then
+  for _, prefix in ipairs({ "/opt/homebrew", "/usr/local" }) do
+    local clangd = prefix .. "/opt/llvm/bin/clangd"
+    if vim.fn.executable(clangd) == 1 then
+      vim.lsp.config("clangd", { cmd = { clangd } })
+      break
+    end
+  end
+end
+vim.lsp.config("ansiblels", {
+  settings = { ansible = { python = { interpreterPath = "python3" } } },
+})
+
+-- CodeLens API differs between Neovim 0.11 and 0.12.
+vim.lsp.config("terraformls", {
+  on_attach = function(_, bufnr)
+    if vim.lsp.codelens.enable then
+      vim.lsp.codelens.enable(true, { bufnr = bufnr })
+    else
+      vim.lsp.codelens.refresh({ bufnr = bufnr })
+    end
+  end,
+})
+
+-- Native LSP setup: https://neovim.io/doc/user/lsp.html#lsp-quickstart
+-- Server defaults: https://github.com/neovim/nvim-lspconfig
+for _, name in ipairs({
+  "gopls", "pylsp", "clangd", "bashls", "yamlls", "jsonls",
+  "terraformls", "ansiblels", "jinja_lsp", "nginx_language_server",
+}) do
+  local config = vim.lsp.config[name]
+  if config and (type(config.cmd) == "function"
+      or (type(config.cmd) == "table" and vim.fn.executable(config.cmd[1]) == 1)) then
+    vim.lsp.enable(name)
+  end
+end
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(event)
+    local client = vim.lsp.get_client_by_id(event.data.client_id)
+    if client and client:supports_method("textDocument/completion") then
+      vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = true })
+    end
+    vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = event.buf, desc = "Go to definition" })
+  end,
+})

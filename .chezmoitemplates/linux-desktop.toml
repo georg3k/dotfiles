@@ -1,0 +1,84 @@
+{{ $arch := .chezmoi.arch -}}
+{{ $xarch := "aarch64" }}{{ if eq $arch "amd64" }}{{ $xarch = "x86_64" }}{{ end -}}
+{{ $electronArch := "arm64" }}{{ if eq $arch "amd64" }}{{ $electronArch = "x64" }}{{ end -}}
+
+[[apps]]
+name = "veracrypt"
+kind = "deb"
+package = "veracrypt"
+{{ includeTemplate "github-asset.toml" (dict "repo" "veracrypt/VeraCrypt" "pattern" (printf "veracrypt-*-Ubuntu-26.04-%s.deb" $arch) "checksumKey" "sha256") }}
+
+[[apps]]
+name = "podman-desktop"
+kind = "tar"
+strip = 1
+binary = "podman-desktop"
+icon = ""
+{{ includeTemplate "github-asset.toml" (dict "repo" "podman-desktop/podman-desktop" "pattern" (printf "podman-desktop-*-%s.tar.gz" $electronArch) "checksumKey" "sha256") }}
+
+[[apps]]
+name = "musescore"
+kind = "appimage"
+{{ includeTemplate "github-asset.toml" (dict "repo" "musescore/MuseScore" "pattern" (printf "MuseScore-Studio-*-%s.AppImage" $xarch) "checksumKey" "sha256") }}
+
+[[apps]]
+name = "anki"
+kind = "anki"
+{{ includeTemplate "github-asset.toml" (dict "repo" "ankitects/anki" "pattern" (printf "anki-*-linux-%s.tar.zst" $xarch) "checksumKey" "sha256") }}
+
+[[apps]]
+name = "zotero"
+kind = "tar"
+strip = 1
+binary = "zotero"
+icon = "icons/icon128.png"
+url = "https://www.zotero.org/download/client/dl?channel=release&platform=linux-{{ if eq $arch "amd64" }}x86_64{{ else }}arm64{{ end }}"
+
+[[apps]]
+name = "obsidian"
+{{ if eq $arch "amd64" -}}
+kind = "deb"
+package = "obsidian"
+{{ includeTemplate "github-asset.toml" (dict "repo" "obsidianmd/obsidian-releases" "pattern" "obsidian_*_amd64.deb" "checksumKey" "sha256") }}
+{{ else -}}
+kind = "tar"
+strip = 1
+binary = "obsidian"
+icon = "resources/icon.png"
+{{ includeTemplate "github-asset.toml" (dict "repo" "obsidianmd/obsidian-releases" "pattern" "obsidian-*-arm64.tar.gz" "checksumKey" "sha256") }}
+{{ end }}
+
+[[apps]]
+name = "bitwarden"
+{{ if eq $arch "amd64" -}}
+kind = "deb"
+package = "bitwarden"
+{{ includeTemplate "github-asset.toml" (dict "repo" "bitwarden/clients" "pattern" "Bitwarden-*-amd64.deb" "checksumKey" "sha256") }}
+{{ else -}}
+kind = "tar"
+strip = 0
+binary = "bitwarden"
+icon = "resources/icons/256x256.png"
+{{ includeTemplate "github-asset.toml" (dict "repo" "bitwarden/clients" "pattern" "bitwarden_*_arm64.tar.gz" "checksumKey" "sha256") }}
+{{ end }}
+
+{{ if eq $arch "amd64" }}
+[[apps]]
+name = "upscayl"
+kind = "deb"
+package = "upscayl"
+{{ includeTemplate "github-asset.toml" (dict "repo" "upscayl/upscayl" "pattern" "upscayl-*-linux.deb" "checksumKey" "sha256") }}
+
+[[apps]]
+name = "telegram"
+kind = "tar"
+strip = 1
+binary = "Telegram"
+icon = ""
+{{ includeTemplate "github-asset.toml" (dict "repo" "telegramdesktop/tdesktop" "pattern" "td-setup-linux-x64-*.tar.xz" "checksumKey" "sha256") }}
+
+[[apps]]
+name = "amneziavpn"
+kind = "qt-installer"
+{{ includeTemplate "github-asset.toml" (dict "repo" "amnezia-vpn/amnezia-client" "pattern" "AmneziaVPN_*_linux_x64.run" "checksumKey" "sha256") }}
+{{ end }}

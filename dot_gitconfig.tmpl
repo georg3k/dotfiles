@@ -1,0 +1,10 @@
+[user]
+    useConfigOnly = true
+
+[include]
+    path = ~/.config/git/github.inc
+
+{{ include ".private/identity-rule.age" | decrypt }}
+
+[core]
+    editor = nvim

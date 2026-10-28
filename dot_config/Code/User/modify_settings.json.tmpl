@@ -1,0 +1,3 @@
+#!/bin/sh
+set -eu
+jq -s --argjson managed {{ include ".chezmoitemplates/vscode-settings.json" | fromJson | toJson | quote }} '(.[0] // {}) * $managed'

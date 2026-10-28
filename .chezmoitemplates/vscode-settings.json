@@ -1,0 +1,10 @@
+{
+  "window.autoDetectColorScheme": true,
+  "workbench.colorTheme": "Rosé Pine",
+  "workbench.preferredDarkColorTheme": "Rosé Pine",
+  "workbench.preferredLightColorTheme": "Rosé Pine Dawn",
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "editor.fontFamily": "'Fira Code', monospace",
+  "terminal.integrated.fontFamily": "'Fira Code', monospace"
+}

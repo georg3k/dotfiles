@@ -1,0 +1,70 @@
+{{ if and (eq .chezmoi.os "linux") (ne .profile "minimal") -}}
+#!/bin/sh
+set -eu
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+  exec dbus-run-session -- sh "$0"
+fi
+case "$(gnome-shell --version)" in
+  'GNOME Shell 50.'*|'GNOME Shell 50') ;;
+  *) printf '%s\n' 'This appearance setup requires GNOME 50 (Ubuntu 26.04).' >&2; exit 1 ;;
+esac
+
+night="$HOME/.local/share/gnome-shell/extensions/nightthemeswitcher@romainvigier.fr"
+glib-compile-schemas "$night/schemas"
+export GSETTINGS_SCHEMA_DIR="$night/schemas"
+
+gsettings set org.gnome.system.location enabled true
+gsettings set org.gnome.shell.extensions.nightthemeswitcher.time manual-schedule false
+gsettings set org.gnome.shell.extensions.nightthemeswitcher.color-scheme day 'prefer-light'
+gsettings set org.gnome.shell.extensions.nightthemeswitcher.color-scheme night 'prefer-dark'
+# GTK3 does not consistently follow the modern colour-scheme setting.
+day='gsettings set org.gnome.desktop.interface gtk-theme rose-pine-dawn-gtk; gsettings set org.gnome.shell.extensions.user-theme name RosePine-Dawn'
+night_command='gsettings set org.gnome.desktop.interface gtk-theme rose-pine-gtk; gsettings set org.gnome.shell.extensions.user-theme name RosePine'
+gsettings set org.gnome.shell.extensions.nightthemeswitcher.commands sunrise "$day"
+gsettings set org.gnome.shell.extensions.nightthemeswitcher.commands sunset "$night_command"
+gsettings set org.gnome.shell.extensions.nightthemeswitcher.commands enabled true
+
+gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
+gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-automatic true
+
+gsettings set org.gnome.Ptyxis interface-style 'system'
+gsettings set org.gnome.Ptyxis font-name 'Fira Code 11'
+gsettings set org.gnome.Ptyxis use-system-font false
+
+python3 - <<'PY'
+from gi.repository import Gio
+terminal = Gio.Settings.new('org.gnome.Ptyxis')
+profiles = list(terminal.get_strv('profile-uuids'))
+profile = terminal.get_string('default-profile-uuid')
+if not profile:
+    profile = profiles[0] if profiles else Gio.dbus_generate_guid()
+if profile not in profiles:
+    profiles.append(profile)
+terminal.set_strv('profile-uuids', profiles)
+terminal.set_string('default-profile-uuid', profile)
+Gio.Settings.new_with_path('org.gnome.Ptyxis.Profile',
+                          f'/org/gnome/Ptyxis/Profiles/{profile}/').set_string('palette', 'rose-pine')
+settings = Gio.Settings.new('org.gnome.shell')
+enabled = list(settings.get_strv('enabled-extensions'))
+ours = ('user-theme@gnome-shell-extensions.gcampax.github.com',
+        'nightthemeswitcher@romainvigier.fr')
+for uuid in ours:
+    if uuid not in enabled:
+        enabled.append(uuid)
+settings.set_strv('enabled-extensions', enabled)
+settings.set_strv('disabled-extensions',
+                  [uuid for uuid in settings.get_strv('disabled-extensions') if uuid not in ours])
+settings.set_boolean('disable-user-extensions', False)
+Gio.Settings.sync()
+PY
+
+case "$(gsettings get org.gnome.desktop.interface color-scheme)" in
+  "'prefer-dark'")
+    sh -c "$night_command"
+    ;;
+  *)
+    sh -c "$day"
+    ;;
+esac
+printf '%s\n' 'Rosé Pine configured. Log out/in once to load newly installed GNOME extensions, and reopen applications.'
+{{ end -}}

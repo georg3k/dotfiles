@@ -1,0 +1,18 @@
+# Global defaults
+profile = "personal"
+shellTheme = "agnoster"
+shellPlugins = ["git"]
+
+# VS Code extensions
+vscodeExtensions = [
+  "ms-vscode.cpptools-extension-pack",
+  "openai.chatgpt",
+  "ms-azuretools.vscode-containers",
+  "hashicorp.hcl",
+  "hashicorp.terraform",
+  "ms-toolsai.jupyter",
+  "ms-python.python",
+  "ms-python.debugpy",
+  "TheQtCompany.qt",
+  "mvllow.rose-pine",
+]

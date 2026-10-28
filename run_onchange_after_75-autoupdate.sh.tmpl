@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+{{ if eq .chezmoi.os "darwin" -}}
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+# Trust this external command only, not every command/formula in the tap.
+brew trust --command domt4/autoupdate/autoupdate
+if [ ! -f "$HOME/Library/LaunchAgents/com.github.domt4.homebrew-autoupdate.plist" ]; then
+  brew autoupdate start 86400 --upgrade
+else
+  printf '%s\n' 'Existing Homebrew autoupdate job preserved; inspect with brew autoupdate status.'
+fi
+{{ else if eq .chezmoi.os "linux" -}}
+if [ "$(dpkg-query -W -f='${Status}' unattended-upgrades 2>/dev/null || true)" != 'install ok installed' ]; then
+  sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y unattended-upgrades
+fi
+sudo tee /etc/apt/apt.conf.d/90chezmoi-periodic >/dev/null <<'EOF'
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
+sudo systemctl enable --now apt-daily.timer apt-daily-upgrade.timer
+{{ end -}}

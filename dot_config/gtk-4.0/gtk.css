@@ -1,0 +1,72 @@
+/* Rosé Pine GTK v2.2.0 colours, adapted to libadwaita CSS variables.
+ * GTK >= 4.20 follows the system light/dark preference automatically.
+ * Only colours are changed; widget layout remains the application default.
+ * https://github.com/rose-pine/gtk */
+:root {
+  --accent-bg-color: #907aa9;
+  --accent-fg-color: #faf4ed;
+  --accent-color: #907aa9;
+  --destructive-bg-color: #b4637a;
+  --destructive-fg-color: #faf4ed;
+  --destructive-color: #b4637a;
+  --success-bg-color: #56949f;
+  --success-fg-color: #575279;
+  --success-color: #56949f;
+  --warning-bg-color: #ea9d34;
+  --warning-fg-color: #575279;
+  --warning-color: #ea9d34;
+  --error-bg-color: #b4637a;
+  --error-fg-color: #575279;
+  --error-color: #b4637a;
+  --window-bg-color: #faf4ed;
+  --window-fg-color: #575279;
+  --view-bg-color: #f2e9e1;
+  --view-fg-color: #575279;
+  --headerbar-bg-color: #faf4ed;
+  --headerbar-fg-color: #575279;
+  --headerbar-backdrop-color: #faf4ed;
+  --headerbar-shade-color: #faf4ed;
+  --card-bg-color: #fffaf3;
+  --card-fg-color: #575279;
+  --card-shade-color: #fffaf3;
+  --popover-bg-color: #f2e9e1;
+  --popover-fg-color: #575279;
+  --sidebar-backdrop-color: #f2e9e1;
+  --sidebar-bg-color: #f2e9e1;
+  --sidebar-fg-color: #575279;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent-bg-color: #c4a7e7;
+    --accent-fg-color: #191724;
+    --accent-color: #c4a7e7;
+    --destructive-bg-color: #eb6f92;
+    --destructive-fg-color: #191724;
+    --destructive-color: #eb6f92;
+    --success-bg-color: #9ccfd8;
+    --success-fg-color: #e0def4;
+    --success-color: #9ccfd8;
+    --warning-bg-color: #f6c177;
+    --warning-fg-color: #e0def4;
+    --warning-color: #f6c177;
+    --error-bg-color: #eb6f92;
+    --error-fg-color: #e0def4;
+    --error-color: #eb6f92;
+    --window-bg-color: #191724;
+    --window-fg-color: #e0def4;
+    --view-bg-color: #26233a;
+    --view-fg-color: #e0def4;
+    --headerbar-bg-color: #191724;
+    --headerbar-fg-color: #e0def4;
+    --headerbar-backdrop-color: #191724;
+    --headerbar-shade-color: #191724;
+    --card-bg-color: #1f1d2e;
+    --card-fg-color: #e0def4;
+    --card-shade-color: #1f1d2e;
+    --popover-bg-color: #26233a;
+    --popover-fg-color: #e0def4;
+    --sidebar-backdrop-color: #26233A;
+    --sidebar-bg-color: #26233A;
+    --sidebar-fg-color: #e0def4;
+  }
+}

@@ -1,0 +1,3 @@
+{{ if and (eq .chezmoi.os "linux") (ne .profile "minimal") -}}
+{{ include ".private/desktop-vendors.age" | decrypt }}
+{{ end -}}

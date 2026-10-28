@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Native scheduling: https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>org.clamav.freshclam</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew{{ else }}/usr/local{{ end }}/bin/freshclam</string>
+    <string>--config-file={{ joinPath .chezmoi.homeDir ".config/clamav/freshclam.conf" | html }}</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StartInterval</key>
+  <integer>7200</integer>
+</dict>
+</plist>

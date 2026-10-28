@@ -1,0 +1,136 @@
+#!/bin/sh
+set -eu
+export PATH="$HOME/.local/bin:$PATH"
+{{ if eq .chezmoi.os "darwin" }}
+{{- $jamf := include ".private/policies.age" | decrypt | fromToml }}
+export CHEZMOI_CORPORATE={{ if (eq .profile "corporate") }}1{{ else }}0{{ end }}
+{{ if (eq .profile "corporate") }}
+if [ ! -x /usr/local/bin/jamf ]; then
+  printf '%s\n' 'Corporate mode requires the enrolled Mac and its Jamf client.' >&2
+  exit 1
+fi
+{{ end }}
+if ! command -v brew >/dev/null 2>&1; then
+  case "$(uname -m)" in
+    arm64) brew_prefix=/opt/homebrew ;;
+    *) brew_prefix=/usr/local ;;
+  esac
+  if [ ! -x "$brew_prefix/bin/brew" ]; then
+{{ if (eq .profile "corporate") }}
+    sudo /usr/local/bin/jamf policy -trigger {{ $jamf.bootstrap.trigger | quote }}
+    if [ ! -x "$brew_prefix/bin/brew" ]; then
+      printf '%s\n' 'Jamf did not install Homebrew; check policy availability/scope in Self Service.' >&2
+      exit 1
+    fi
+{{ else }}
+    bootstrap_file=$(mktemp)
+    trap 'rm -f "$bootstrap_file"' 0
+    curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o "$bootstrap_file"
+    /bin/bash "$bootstrap_file"
+    rm -f "$bootstrap_file"
+    trap - 0
+{{ end }}
+  fi
+  export PATH="$brew_prefix/bin:$brew_prefix/sbin:$PATH"
+fi
+# Brewfile content: {{ include ".private/packages.age" | decrypt | sha256sum }}
+{{ if (eq .profile "corporate") }}
+# Jamf manifest content: {{ include ".private/policies.age" | decrypt | sha256sum }}
+export HOMEBREW_BUNDLE_CASK_SKIP="{{ range $cask, $_ := $jamf.apps }}{{ $cask }} {{ end }}"
+
+install_jamf_app() {
+  trigger=$1
+  shift
+  for app_path do
+    if [ -d "$app_path" ]; then return; fi
+  done
+  sudo /usr/local/bin/jamf policy -trigger "$trigger"
+  for app_path do
+    if [ -d "$app_path" ]; then return; fi
+  done
+  printf 'Jamf did not install %s. Check Self Service/scope; no Brew fallback.\n' "$trigger" >&2
+  exit 1
+}
+
+{{ range $name, $package := $jamf.packages -}}
+if ! pkgutil --pkg-info {{ $package.receipt | quote }} >/dev/null 2>&1; then
+  sudo /usr/local/bin/jamf policy -trigger {{ $package.trigger | quote }}
+  if ! pkgutil --pkg-info {{ $package.receipt | quote }} >/dev/null 2>&1; then
+    printf '%s\n' 'Jamf did not install {{ $name }}. Check Self Service/scope.' >&2
+    exit 1
+  fi
+fi
+{{ end }}
+{{ range $cask, $app := $jamf.apps -}}
+install_jamf_app {{ $app.trigger | quote }}{{ range $app.paths }} {{ . | quote }}{{ end }}
+{{ end }}
+{{ range $name, $app := $jamf.corporateOnly -}}
+install_jamf_app {{ $app.trigger | quote }}{{ range $app.paths }} {{ . | quote }}{{ end }}
+{{ end }}
+{{ end }}
+{{ include ".private/packages-existing.age" | decrypt }}
+brewfile=$(mktemp)
+trap 'rm -f "$brewfile"' 0
+cat > "$brewfile" <<'CHEZMOI_PACKAGES'
+cask_args force: true
+cask "steam"
+{{ include ".private/packages.age" | decrypt }}
+CHEZMOI_PACKAGES
+export HOMEBREW_BUNDLE_BREW_SKIP="${HOMEBREW_BUNDLE_BREW_SKIP:-} hashicorp/tap/terraform terraform"
+if ! brew list --cask openvpn-connect >/dev/null 2>&1; then
+  (
+    curl_config=$(mktemp)
+    trap 'rm -f "$curl_config"' 0
+    # Avoid interrupted HTTP/2 transfers from the OpenVPN download server.
+    printf '%s\n' 'http1.1' > "$curl_config"
+    HOMEBREW_CURLRC="$curl_config" brew fetch --retry --cask openvpn-connect
+  )
+fi
+brew bundle install --file="$brewfile"
+{{ else if eq .chezmoi.os "linux" }}
+# Apt list content: {{ include "packages/apt.txt" | sha256sum }}
+{{ if ne .profile "minimal" }}
+# Desktop apt list: {{ include "packages/apt-desktop.txt" | sha256sum }}
+{{ end }}
+. /etc/os-release
+if [ "$ID" != ubuntu ] || [ "$VERSION_ID" != 26.04 ]; then
+  printf '%s\n' 'The apt manifest is for Ubuntu 26.04; review it before using another release.' >&2
+  exit 1
+fi
+sudo apt-get update
+printf '%s\n' 'wireshark-common wireshark-common/install-setuid boolean true' |
+  sudo debconf-set-selections
+sed '/^[[:space:]]*#/d; /^[[:space:]]*$/d' {{ joinPath .chezmoi.sourceDir "packages" "apt.txt" | quote }}{{ if ne .profile "minimal" }} {{ joinPath .chezmoi.sourceDir "packages" "apt-desktop.txt" | quote }}{{ end }} |
+  xargs -r sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y{{ if eq .profile "minimal" }} --no-install-recommends{{ end }}
+{{ if and (eq .profile "personal") (eq .chezmoi.arch "amd64") }}
+sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y steam-installer
+{{ end }}
+sudo env DEBIAN_FRONTEND=noninteractive dpkg-reconfigure wireshark-common
+sudo usermod -aG wireshark "$(id -un)"
+if ! command -v bw >/dev/null 2>&1; then
+  npm install --global --prefix "$HOME/.local" @bitwarden/cli
+fi
+for tool in bash-language-server yaml-language-server vscode-json-language-server ansible-language-server; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    case "$tool" in
+      vscode-json-language-server) package=vscode-langservers-extracted ;;
+      ansible-language-server) package=@ansible/ansible-language-server ;;
+      *) package=$tool ;;
+    esac
+    npm install --global --prefix "$HOME/.local" "$package"
+  fi
+done
+{{ else }}
+printf '%s\n' 'Package installation supports macOS or Ubuntu Linux only.' >&2
+exit 1
+{{ end }}
+# Keep this server isolated on its supported Python version.
+if ! nginx-language-server --help >/dev/null 2>&1; then
+  if command -v nginx-language-server >/dev/null 2>&1; then
+    pipx reinstall --python 3.13 --fetch-missing-python nginx-language-server
+  else
+    pipx install --python 3.13 --fetch-missing-python \
+      --pip-args='--only-binary=:all: --timeout=30 --retries=2' nginx-language-server
+  fi
+  nginx-language-server --help >/dev/null
+fi

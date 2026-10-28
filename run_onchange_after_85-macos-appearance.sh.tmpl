@@ -1,0 +1,27 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/sh
+set -eu
+# Native preference keys checked against macOS 26.3.
+case "$(sw_vers -productVersion)" in
+  26.*) ;;
+  *) printf '%s\n' 'macOS icon appearance skipped: review these preferences for this OS version.' >&2; exit 0 ;;
+esac
+
+# Native purple accent; Rosé Pine iris selection highlight.
+defaults write NSGlobalDomain AppleAccentColor -int 5
+defaults write NSGlobalDomain AppleAquaColorVariant -int 1
+defaults write NSGlobalDomain AppleHighlightColor -string '0.7686274510 0.6549019608 0.9058823529 Other'
+
+# Current menu-bar clock preferences.
+defaults write com.apple.menuextra.clock ShowSeconds -bool true
+defaults write com.apple.menuextra.clock ShowDate -int 1
+defaults write com.apple.menuextra.clock ShowDayOfWeek -bool true
+defaults write com.apple.menuextra.clock IsAnalog -bool false
+
+defaults write NSGlobalDomain AppleInterfaceStyleSwitchesAutomatically -bool true
+defaults write NSGlobalDomain AppleIconAppearanceTheme -string TintedAutomatic
+defaults write NSGlobalDomain AppleIconAppearanceTintColor -string Other
+defaults write NSGlobalDomain AppleIconAppearanceCustomTintColor -string '0.5647058824 0.5490196078 0.6666666667 1.0'
+
+printf '%s\n' 'Rosé Pine tinted icons configured. Log out and back in to apply the icon appearance.'
+{{ end -}}
