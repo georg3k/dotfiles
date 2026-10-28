@@ -70,6 +70,7 @@ Library/**
 .config/git/**
 {{ end }}
 {{ if not (lookPath "zsh") }}
+.config/zsh/**
 .zshrc
 {{ end }}
 {{ if not (or (lookPath "vim") (lookPath "vi")) }}

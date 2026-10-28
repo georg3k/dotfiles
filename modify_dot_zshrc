@@ -1,0 +1,21 @@
+#!/bin/sh
+awk '
+$0 == "# >>> chezmoi >>>" {
+  if (!written) {
+    print "# >>> chezmoi >>>"
+    print "[[ ! -r \"$HOME/.config/zsh/managed.zsh\" ]] || source \"$HOME/.config/zsh/managed.zsh\""
+    print "# <<< chezmoi <<<"
+    written = 1
+  }
+  inside = 1
+  next
+}
+$0 == "# <<< chezmoi <<<" { inside = 0; next }
+!inside { print }
+END {
+  if (!written) {
+    print "# >>> chezmoi >>>"
+    print "[[ ! -r \"$HOME/.config/zsh/managed.zsh\" ]] || source \"$HOME/.config/zsh/managed.zsh\""
+    print "# <<< chezmoi <<<"
+  }
+}'
