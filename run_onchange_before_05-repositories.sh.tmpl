@@ -2,8 +2,8 @@
 #!/bin/sh
 set -eu
 . /etc/os-release
-if [ "$ID" != ubuntu ] || [ "$VERSION_ID" != 26.04 ]; then
-  printf '%s\n' 'This setup requires Ubuntu 26.04.' >&2
+if [ "$ID" != ubuntu ] || { [ "$VERSION_ID" != 26.04 ] && {{ if eq .profile "minimal" }}[ "$VERSION_ID" != 24.04 ]{{ else }}true{{ end }}; }; then
+  printf '%s\n' 'Supported: Ubuntu 26.04; minimal also supports Ubuntu 24.04.' >&2
   exit 1
 fi
 sudo env DEBIAN_FRONTEND=noninteractive apt-get update
@@ -15,6 +15,20 @@ sudo add-apt-repository --yes multiverse
 {{ end }}
 download=$(mktemp -d)
 trap 'rm -rf "$download"' 0
+
+{{ if and (eq .profile "minimal") (eq .chezmoi.osRelease.versionID "24.04") -}}
+# NodeSource: https://github.com/nodesource/distributions
+curl -fsSL --connect-timeout 15 --max-time 120 \
+  https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key -o "$download/nodesource.asc"
+sudo install -D -m 644 "$download/nodesource.asc" /etc/apt/keyrings/nodesource.asc
+sudo tee /etc/apt/sources.list.d/nodesource.sources >/dev/null <<'EOF'
+Types: deb
+URIs: https://deb.nodesource.com/node_24.x
+Suites: nodistro
+Components: main
+Signed-By: /etc/apt/keyrings/nodesource.asc
+EOF
+{{ end -}}
 
 # Kubernetes publishes a separate signed repository for each minor release.
 release=$(curl -fsSL --connect-timeout 15 --max-time 120 https://dl.k8s.io/release/stable.txt)

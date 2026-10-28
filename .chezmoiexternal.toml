@@ -6,7 +6,7 @@ refreshPeriod = "168h"
 exact = true
 stripComponents = 1
 
-{{ if eq .chezmoi.os "darwin" }}
+{{ if or (eq .chezmoi.os "darwin") (and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.versionID "24.04")) }}
 [".local/share/nvim/site/pack/chezmoi/start/lualine.nvim"]
 type = "archive"
 url = "https://github.com/nvim-lualine/lualine.nvim/archive/HEAD.tar.gz"
@@ -161,6 +161,15 @@ type = "file"
 url = "https://raw.githubusercontent.com/gnachman/iTerm2-shell-integration/HEAD/utilities/imgcat"
 refreshPeriod = "168h"
 executable = true
+{{ end }}
+
+{{ if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.versionID "24.04") }}
+[".local/opt/nvim"]
+type = "archive"
+{{ $nvimArch := "arm64" }}{{ if eq .chezmoi.arch "amd64" }}{{ $nvimArch = "x86_64" }}{{ end -}}
+{{ includeTemplate "github-asset.toml" (dict "repo" "neovim/neovim" "pattern" (printf "nvim-linux-%s.tar.gz" $nvimArch) "checksumKey" "checksum.sha256") }}
+stripComponents = 1
+exact = true
 {{ end }}
 
 # CLI tools

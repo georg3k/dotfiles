@@ -93,14 +93,17 @@ brew bundle install --file="$brewfile"
 # Desktop apt list: {{ include "packages/apt-desktop.txt" | sha256sum }}
 {{ end }}
 . /etc/os-release
-if [ "$ID" != ubuntu ] || [ "$VERSION_ID" != 26.04 ]; then
-  printf '%s\n' 'The apt manifest is for Ubuntu 26.04; review it before using another release.' >&2
+if [ "$ID" != ubuntu ] || { [ "$VERSION_ID" != 26.04 ] && {{ if eq .profile "minimal" }}[ "$VERSION_ID" != 24.04 ]{{ else }}true{{ end }}; }; then
+  printf '%s\n' 'Supported: Ubuntu 26.04; minimal also supports Ubuntu 24.04.' >&2
   exit 1
 fi
 sudo apt-get update
 printf '%s\n' 'wireshark-common wireshark-common/install-setuid boolean true' |
   sudo debconf-set-selections
 sed '/^[[:space:]]*#/d; /^[[:space:]]*$/d' {{ joinPath .chezmoi.sourceDir "packages" "apt.txt" | quote }}{{ if ne .profile "minimal" }} {{ joinPath .chezmoi.sourceDir "packages" "apt-desktop.txt" | quote }}{{ end }} |
+{{ if and (eq .profile "minimal") (eq .chezmoi.osRelease.versionID "24.04") -}}
+  sed -e '/^neovim$/d' -e '/^neovim-lualine$/d' -e '/^npm$/d' -e '/^awscli$/d' |
+{{ end -}}
   xargs -r sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y{{ if eq .profile "minimal" }} --no-install-recommends{{ end }}
 {{ if and (eq .profile "personal") (eq .chezmoi.arch "amd64") }}
 sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y steam-installer
@@ -127,9 +130,9 @@ exit 1
 # Keep this server isolated on its supported Python version.
 if ! nginx-language-server --help >/dev/null 2>&1; then
   if command -v nginx-language-server >/dev/null 2>&1; then
-    pipx reinstall --python 3.13 --fetch-missing-python nginx-language-server
+    pipx reinstall {{ if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.versionID "24.04") }}--python python3{{ else }}--python 3.13 --fetch-missing-python{{ end }} nginx-language-server
   else
-    pipx install --python 3.13 --fetch-missing-python \
+    pipx install {{ if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.versionID "24.04") }}--python python3{{ else }}--python 3.13 --fetch-missing-python{{ end }} \
       --pip-args='--only-binary=:all: --timeout=30 --retries=2' nginx-language-server
   fi
   nginx-language-server --help >/dev/null

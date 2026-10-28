@@ -26,7 +26,9 @@ defaults write com.apple.HIToolbox AppleEnabledInputSources -array \
 {{ else -}}
 shell_path=/usr/bin/zsh
 current_shell=$(getent passwd "$(id -un)" | cut -d: -f7)
+{{ if ne .chezmoi.osRelease.versionID "24.04" -}}
 sudo update-alternatives --set editor /usr/bin/nvim
+{{ end -}}
 {{ if ne .profile "minimal" -}}
 if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
   exec dbus-run-session -- sh "$0"

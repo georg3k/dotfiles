@@ -50,3 +50,7 @@ Library/LaunchAgents/org.clamav.freshclam.plist
 
 # Generated locally by glib-compile-schemas.
 .local/share/gnome-shell/extensions/nightthemeswitcher@romainvigier.fr/schemas/gschemas.compiled
+
+{{ if not (and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.versionID "24.04")) }}
+.local/bin/nvim
+{{ end }}

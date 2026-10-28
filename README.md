@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal [chezmoi](https://www.chezmoi.io/) setup for macOS and Ubuntu.
+Personal [chezmoi](https://www.chezmoi.io/) setup for macOS and Ubuntu 26.04 (minimal also supports Ubuntu 24.04).
 
 ## Install
 

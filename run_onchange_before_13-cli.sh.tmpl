@@ -4,3 +4,17 @@ SETUP_OS={{ .chezmoi.os | quote }}
 SETUP_PROFILE={{ .profile | quote }}
 {{ include ".private/cli-install.age" | decrypt }}
 {{ end -}}
+{{ if and (eq .profile "minimal") (eq .chezmoi.osRelease.versionID "24.04") -}}
+#!/bin/sh
+set -eu
+export PATH="$HOME/.local/bin:$PATH"
+if ! command -v aws >/dev/null 2>&1; then
+  work=$(mktemp -d)
+  trap 'rm -rf "$work"' 0
+  # Official installer: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+  curl -fL --connect-timeout 15 --max-time 1800 \
+    "https://awscli.amazonaws.com/awscli-exe-linux-{{ if eq .chezmoi.arch "amd64" }}x86_64{{ else }}aarch64{{ end }}.zip" -o "$work/aws.zip"
+  unzip -q "$work/aws.zip" -d "$work"
+  "$work/aws/install" --install-dir "$HOME/.local/lib/aws-cli" --bin-dir "$HOME/.local/bin" --update
+fi
+{{ end -}}
