@@ -1,6 +1,6 @@
 Host github.com
     User git
-    IdentityAgent ~/.bitwarden-ssh-agent.sock
+    IdentityAgent {{ if and (eq .chezmoi.os "darwin") (glob "/Applications/Bitwarden.app/Contents/_MASReceipt/receipt") }}~/Library/Containers/com.bitwarden.desktop/Data/.bitwarden-ssh-agent.sock{{ else }}~/.bitwarden-ssh-agent.sock{{ end }}
 
 {{ if eq .profile "corporate" -}}
 {{ include ".private/ssh.age" | decrypt }}
