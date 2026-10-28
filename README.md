@@ -25,11 +25,13 @@ Personal/corporate: place your **age** private key at `~/.config/chezmoi/age-key
 
 ## Post-deploy steps
 
+Corporate certificate installation retries on subsequent applies when download access or administrator authorization is unavailable.
+
 - **Steam** (desktop profiles, amd64 only): sign in; on Linux enable Steam Play/Proton via Settings → Compatibility
 - **Accounts:** sign into apps, set up VPNs, sync, hardware permissions
 - **Secrets:** enable Bitwarden's SSH agent; add your public key to GitHub
 - **Firefox:** enable Sync; apply Rosé Pine themes with automaticDark for light/dark switching
-- **iTerm:** restart iTerm after apply; select Fira Code; import presets from `~/.local/share/themes/rose-pine-iterm` (Main for dark, Dawn for light)
+- **iTerm:** restart iTerm after apply; select Fira Code; import presets from `~/.local/share/themes/rose-pine-iterm` (use `~/.local/share/themes/rose-pine-iterm-custom/rose-pine-contrast.itermcolors` for dark, Dawn for light)
 - **Obsidian:** per vault, select Rosé Pine, "Adapt to system", Fira Code (staged files in `~/.local/share/themes/rose-pine-obsidian`). CLI is bundled: enable Settings → General → Command line interface (requires installer 1.12.7+); chezmoi registers the bundled executable outside minimal mode. Keep Obsidian open while using CLI commands.
 - **Telegram (macOS):** install the pre-created [Rosé Pine Dawn](https://t.me/addtheme/t92mgwdG0XiynBSL) and [Rosé Pine](https://t.me/addtheme/m3iEr0CcgyZWEHbf) themes; use Dawn for daytime and Rosé Pine for Auto-Night → System Based.
 - **Telegram (Linux):** import theme from `~/.local/share/themes/rose-pine-telegram`
@@ -45,6 +47,8 @@ Personal/corporate: place your **age** private key at `~/.config/chezmoi/age-key
 - ChatGPT/Telemost (Linux): use web apps
 - Remote desktop: Windows App or FreeRDP (macOS), Remmina (Linux)
 - Some vendor apps unavailable on ARM64
+
+Shell settings: `chezmoi edit ~/.config/zsh/managed.zsh`; other tools may append to `.zshrc` outside the chezmoi block.
 
 ## Editing private fragments
 
