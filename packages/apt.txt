@@ -19,6 +19,7 @@ ripgrep
 chafa
 parallel
 tmux
+htop
 tree
 wget
 vim
