@@ -48,6 +48,10 @@ Library/LaunchAgents/org.clamav.freshclam.plist
 .ssh/**
 {{ end }}
 
+{{ if or (ne .chezmoi.os "linux") (ne .profile "personal") }}
+.local/share/applications/krokiet.desktop
+{{ end }}
+
 # Generated locally by glib-compile-schemas.
 .local/share/gnome-shell/extensions/nightthemeswitcher@romainvigier.fr/schemas/gschemas.compiled
 

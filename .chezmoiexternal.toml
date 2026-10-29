@@ -48,6 +48,14 @@ stripComponents = 1
 {{ end }}
 
 {{ if and (eq .chezmoi.os "linux") (ne .profile "minimal") }}
+
+[".local/bin/krokiet"]
+type = "file"
+{{ $krokietArch := "arm64" }}{{ if eq .chezmoi.arch "amd64" }}{{ $krokietArch = "x86_64" }}{{ end -}}
+{{ includeTemplate "github-asset.toml" (dict "repo" "qarmin/czkawka" "pattern" (printf "linux_krokiet_%s" $krokietArch)) }}
+refreshPeriod = "168h"
+executable = true
+
 [".local/share/themes"]
 type = "archive"
 {{ includeTemplate "github-asset.toml" (dict "repo" "rose-pine/gtk" "pattern" "gtk3.tar.gz") }}
