@@ -18,6 +18,7 @@ calibre
 djview4
 ffmpeg
 gimp
+krita
 libreoffice
 obs-studio
 pandoc
